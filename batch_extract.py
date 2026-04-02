@@ -204,7 +204,7 @@ Return ONLY a valid JSON object in the following format, with no additional text
 def extract_metadata_from_pdf(model, processor, pdf_path, max_pages=5):
     """Extract metadata from a single PDF using the model"""
     images = pdf_to_images(pdf_path)
-    pages_to_use = images[:max_pages]
+    pages_to_use = images
 
     content = []
     for img in pages_to_use:
