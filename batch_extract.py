@@ -178,7 +178,7 @@ Available research areas:
 * T13 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
 * T14 Language Modeling and LRs (including training, fine-tuning, representation learning, and generation of synthetic data)
 * T15 Lexicon and Semantics
-* T16 Multilinguality, Machine Translation (including Speech-to-Speech) and Translation Aids
+* T16 Machine Translation (including Speech-to-Speech) and Translation Aids
 * T17 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
 * T18 Natural Language Generation and Summarization
 * T19 Simplification, Plain Language and Assistive Technologies
