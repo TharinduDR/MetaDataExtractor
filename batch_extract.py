@@ -31,13 +31,14 @@ import argparse
 import requests
 import time
 from pathlib import Path
+from tqdm import tqdm
 
 
 # ============================================================
 # Model loading (done once)
 # ============================================================
 
-def load_model(model_name="Qwen/Qwen3-VL-8B-Instruct"):
+def load_model(model_name="Qwen/Qwen3-VL-32B-Instruct"):
     """Load the Qwen3-VL model and processor"""
     print(f"Loading model: {model_name}")
     model = Qwen3VLForConditionalGeneration.from_pretrained(
@@ -145,7 +146,7 @@ def pdf_to_images(pdf_path, scale=2.0):
 
 METADATA_EXTRACTION_PROMPT = """You are a metadata extraction assistant for academic papers in computational linguistics and NLP.
 
-Given a research paper (provided as text or PDF), extract the following metadata and return it as a JSON object:
+Given this research paper, extract the following metadata and return it as a JSON object:
 
 1. **title**: The full title of the paper.
 
@@ -189,7 +190,7 @@ Available research areas:
 * T24 Social Media Processing
 * T25 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
 
-Return ONLY a valid JSON object in the following format, with no additional text or explanation:
+Return ONLY a valid JSON object in the following format, with no additional text, explanation, or markdown fences:
 
 {
   "title": "...",
@@ -333,21 +334,22 @@ def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
         'failed_error': []
     }
 
-    for i, paper_id in enumerate(paper_ids, 1):
+    pbar = tqdm(paper_ids, desc="Processing papers", unit="paper")
+    for paper_id in pbar:
+        pbar.set_postfix_str(paper_id, refresh=True)
         json_path = os.path.join(output_dir, f"{paper_id}.json")
 
         # Skip if already processed
         if os.path.exists(json_path):
-            print(f"\n[{i}/{len(paper_ids)}] {paper_id} - already processed, skipping")
+            tqdm.write(f"  ⏭️  {paper_id} - already processed, skipping")
             results_summary['success'].append(paper_id)
             continue
 
-        print(f"\n[{i}/{len(paper_ids)}] {paper_id}")
         pdf_path = os.path.join(pdf_dir, f"{paper_id}.pdf")
 
         # --- Download ---
         if not os.path.exists(pdf_path):
-            print(f"  ⬇️  Downloading...")
+            tqdm.write(f"  ⬇️  {paper_id} - downloading...")
             pdf_path = download_pdf(paper_id, pdf_dir)
             if pdf_path is None:
                 results_summary['failed_download'].append(paper_id)
@@ -356,7 +358,7 @@ def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
 
         # --- Extract metadata ---
         try:
-            print(f"  🔍 Extracting metadata...")
+            tqdm.write(f"  🔍 {paper_id} - extracting metadata...")
             raw_output = extract_metadata_from_pdf(
                 model, processor_obj, pdf_path, max_pages=max_pages
             )
@@ -365,11 +367,11 @@ def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
             metadata = parse_json_output(raw_output)
 
             if metadata is None:
-                print(f"  ⚠️  Could not parse JSON for {paper_id}")
+                tqdm.write(f"  ⚠️  {paper_id} - could not parse JSON")
                 raw_path = os.path.join(output_dir, f"{paper_id}_raw.txt")
                 with open(raw_path, 'w', encoding='utf-8') as f:
                     f.write(raw_output)
-                print(f"  Raw output saved to {raw_path}")
+                tqdm.write(f"     Raw output saved to {raw_path}")
                 results_summary['failed_parse'].append(paper_id)
             else:
                 # Add paper_id to metadata
@@ -380,21 +382,21 @@ def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
                 with open(json_path, 'w', encoding='utf-8') as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-                print(f"  ✅ Saved: {json_path}")
-                print(f"     Title: {metadata.get('title', 'N/A')[:70]}...")
-                print(f"     Authors: {len(metadata.get('authors', []))} | "
-                      f"Languages: {len(metadata.get('languages', []))} | "
-                      f"Areas: {len(metadata.get('research_areas', []))}")
+                title_short = metadata.get('title', 'N/A')[:60]
+                n_authors = len(metadata.get('authors', []))
+                n_langs = len(metadata.get('languages', []))
+                n_areas = len(metadata.get('research_areas', []))
+                tqdm.write(f"  ✅ {paper_id} - {title_short}...")
+                tqdm.write(f"     Authors: {n_authors} | Languages: {n_langs} | Areas: {n_areas}")
                 results_summary['success'].append(paper_id)
 
         except Exception as e:
-            print(f"  ❌ ERROR: {e}")
+            tqdm.write(f"  ❌ {paper_id} - ERROR: {e}")
             results_summary['failed_error'].append(paper_id)
 
         # --- Cleanup PDF ---
         if not keep_pdfs and os.path.exists(pdf_path):
             os.remove(pdf_path)
-            print(f"  🗑️  PDF deleted")
 
     # Step 4: Print summary
     print(f"\n{'=' * 80}")
@@ -452,8 +454,8 @@ Examples:
                         help="Paper ID to resume from (e.g., 2025.acl-long.50)")
     parser.add_argument("--keep_pdfs", action="store_true",
                         help="Keep PDFs after processing instead of deleting them")
-    parser.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct",
-                        help="HuggingFace model name (default: Qwen/Qwen3-VL-8B-Instruct)")
+    parser.add_argument("--model", default="Qwen/Qwen3-VL-32B-Instruct",
+                        help="HuggingFace model name (default: Qwen/Qwen3-VL-32B-Instruct)")
 
     args = parser.parse_args()
 
