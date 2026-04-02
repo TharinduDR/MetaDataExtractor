@@ -13,7 +13,7 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
     device_map="auto"
 )
 
-processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-32B-Instruct")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
 
 
 # Convert PDF to images using pypdfium2
@@ -83,7 +83,7 @@ Return ONLY a valid JSON object in the following format, with no additional text
   "title": "...",
   "authors": ["...", "..."],
   "languages": ["...", "..."],
-  "research_areas": ["T09 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies", "..."]
+  "research_areas": ["...", "..."]
 }"""
 
 
@@ -102,7 +102,7 @@ def extract_metadata_from_pdf(pdf_path, max_pages=5):
     images = pdf_to_images(pdf_path)
 
     # Use first N pages (title, abstract, intro, methods, results)
-    pages_to_use = images[:max_pages]
+    pages_to_use = images
     print(f"Using {len(pages_to_use)} of {len(images)} pages for metadata extraction.")
 
     # Build message content with multiple images
