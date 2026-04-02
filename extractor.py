@@ -8,7 +8,7 @@ import sys
 
 # Load the model
 model = Qwen3VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen3-VL-32B-Instruct",
+    "Qwen/Qwen3-VL-8B-Instruct",
     torch_dtype=torch.bfloat16,
     device_map="auto"
 )
