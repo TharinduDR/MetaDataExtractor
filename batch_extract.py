@@ -38,7 +38,7 @@ from tqdm import tqdm
 # Model loading (done once)
 # ============================================================
 
-def load_model(model_name="Qwen/Qwen3-VL-32B-Instruct"):
+def load_model(model_name="Qwen/Qwen3-VL-8B-Instruct"):
     """Load the Qwen3-VL model and processor"""
     print(f"Loading model: {model_name}")
     model = Qwen3VLForConditionalGeneration.from_pretrained(
@@ -454,8 +454,8 @@ Examples:
                         help="Paper ID to resume from (e.g., 2025.acl-long.50)")
     parser.add_argument("--keep_pdfs", action="store_true",
                         help="Keep PDFs after processing instead of deleting them")
-    parser.add_argument("--model", default="Qwen/Qwen3-VL-32B-Instruct",
-                        help="HuggingFace model name (default: Qwen/Qwen3-VL-32B-Instruct)")
+    parser.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct",
+                        help="HuggingFace model name (default: Qwen/Qwen3-VL-8B-Instruct)")
 
     args = parser.parse_args()
 
