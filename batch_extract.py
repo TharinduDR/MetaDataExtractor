@@ -195,7 +195,7 @@ Return ONLY a valid JSON object in the following format, with no additional text
   "title": "...",
   "authors": ["...", "..."],
   "languages": ["...", "..."],
-  "research_areas": ["T09 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies", "..."]
+  "research_areas": ["...", "..."]
 }"""
 
 
