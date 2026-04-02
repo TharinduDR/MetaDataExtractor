@@ -145,7 +145,7 @@ def pdf_to_images(pdf_path, scale=2.0):
 
 METADATA_EXTRACTION_PROMPT = """You are a metadata extraction assistant for academic papers in computational linguistics and NLP.
 
-Given this research paper, extract the following metadata and return it as a JSON object:
+Given a research paper (provided as text or PDF), extract the following metadata and return it as a JSON object:
 
 1. **title**: The full title of the paper.
 
@@ -154,6 +154,8 @@ Given this research paper, extract the following metadata and return it as a JSO
 3. **languages**: A list of languages the paper actually conducted experiments on or evaluated. 
    - Only include languages where results are reported.
    - Do NOT include languages that were merely mentioned, discussed as future work, or dropped/eliminated from the study.
+   - If the paper conducts all experiments in a single language (e.g., English), include that language.
+   - Only return an empty list if the paper does not involve natural language at all (e.g., purely about images, code syntax, or protein sequences).
 
 4. **research_areas**: Select between 1 and 3 research areas from the list below that best describe the paper's core contributions. Be strict and selective:
    - Only choose areas that are central to the paper, not tangential.
@@ -187,7 +189,7 @@ Available research areas:
 * T24 Social Media Processing
 * T25 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
 
-Return ONLY a valid JSON object in the following format, with no additional text, explanation, or markdown fences:
+Return ONLY a valid JSON object in the following format, with no additional text or explanation:
 
 {
   "title": "...",
