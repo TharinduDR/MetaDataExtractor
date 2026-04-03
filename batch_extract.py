@@ -160,35 +160,39 @@ Given this research paper, extract the following metadata and return it as a JSO
 
 4. **research_areas**: Select between 1 and 3 research areas from the list below that best describe the paper's core contributions. Be strict and selective:
    - Only choose areas that are central to the paper, not tangential.
-   - If an area's description includes multiple sub-topics (e.g., "Multilinguality, Machine Translation and Translation Aids"), the paper must genuinely fit the relevant sub-topics, not just one keyword.
+   - If an area's description includes multiple sub-topics (e.g., "Machine Translation and Translation Aids"), the paper must genuinely fit the relevant sub-topics, not just one keyword.
    - Prefer fewer, more accurate areas over more, loosely fitting ones.
 
 Available research areas:
-* T01 Applications Involving LRs and Evaluation for any area/domain of language and speech processing
-* T02 Bias, Offensive and Non-inclusive Language; Guardrails, filters
-* T03 Corpora, Treebanks and Annotation; Tools, Systems and Platforms
-* T04 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction
-* T05 Digital Humanities, Cultural Heritage and Computational Social Science
-* T06 Discourse and Pragmatics
-* T07 Document Classification, Information Retrieval and Cross-lingual Retrieval
-* T08 Ethics, Research Reproducibility and Replicability, and Environmental Issues
-* T09 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies
-* T10 Inference, Reasoning, Question Answering
-* T11 Information Extraction and Text Mining
-* T12 Interpretability/explainability of language models and language and speech processing tools
-* T13 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
-* T14 Language Modeling and LRs (including training, fine-tuning, representation learning, and generation of synthetic data)
-* T15 Lexicon and Semantics
-* T16 Machine Translation (including Speech-to-Speech) and Translation Aids
-* T17 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
-* T18 Natural Language Generation and Summarization
-* T19 Simplification, Plain Language and Assistive Technologies
-* T20 Opinion & Argument Mining, Sentiment Analysis, Emotion Recognition/Generation
-* T21 Parsing, Tagging, Chunking, Grammar, Syntax, Morphosyntax, Morphology
-* T22 Policy and Legal Issues (including Language Resource Infrastructures, Interoperability, Standards for LRs, Metadata)
-* T23 Psycholinguistics, Cognitive Linguistics and Linguistic Theories
-* T24 Social Media Processing
-* T25 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
+* T01 Bias, Guardrails, filters
+* T02 Corpora, Treebanks and Annotation; Tools, Systems and Platforms
+* T03 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction
+* T04 Digital Humanities, Cultural Heritage and Computational Social Science
+* T05 Discourse and Pragmatics
+* T06 Information Retrieval and Cross-lingual Retrieval
+* T07 Ethics, Research Reproducibility and Replicability, and Environmental Issues
+* T08 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies
+* T09 Inference and Reasoning
+* T10 Question Answering, Open-domain question answering, closed-domain question answering, extractive and abstractive QA, multi-hop question answering
+* T10 Information Extraction, Named Entity Recognition, Relationship Extraction and Event Detection
+* T11 Interpretability/explainability of language models and language and speech processing tools
+* T12 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
+* T13 Language Modeling (including training, fine-tuning, representation learning, and generation of synthetic data)
+* T14 Lexicon and Semantics
+* T15 Machine Translation (including Speech-to-Speech) and Translation Aids
+* T16 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
+* T17 Text Summarization
+* T18 Text Simplification, Plain Language and Assistive Technologies
+* T19 Opinion & Argument Mining, Offensive Language/ Hate speech/ Toxic Language Detection, Sentiment Analysis, Emotion Recognition/Generation
+* T20 Parsing, Tagging, Chunking, Grammar, Syntax, Morphosyntax, Morphology
+* T21 Policy and Legal Issues (including Language Resource Infrastructures, Interoperability, Standards for LRs, Metadata)
+* T22 Psycholinguistics, Cognitive Linguistics and Linguistic Theories
+* T23 Social Media Processing
+* T24 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
+* T25 Legal NLP
+* T26 Clinical/biomedical NLP
+* T27 Code generation and programming languages 
+* T28 NLP for education, Automated essay scoring and feedback generation, grammatical error correction and detection, intelligent tutoring systems
 
 Return ONLY a valid JSON object in the following format, with no additional text, explanation, or markdown fences:
 
