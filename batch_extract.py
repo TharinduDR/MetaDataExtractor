@@ -191,7 +191,7 @@ Available research areas:
 * T24 Legal NLP
 * T25 Clinical/biomedical NLP, NLP for Mental Health and Wellbeing
 * T26 Code generation and programming languages 
-* T27 AI-Generated Text Detection, Authorship Attribution, and Provenance
+* T27 Authorship Attribution, AI-Generated Text Detection and Provenance
 * T28 NLP for education, Automated essay scoring and feedback generation, grammatical error correction and detection, intelligent tutoring systems
 
 Return ONLY a valid JSON object in the following format, with no additional text, explanation, or markdown fences:
