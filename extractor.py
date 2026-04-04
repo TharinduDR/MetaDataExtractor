@@ -49,6 +49,10 @@ Given this research paper, extract the following metadata and return it as a JSO
    - Only choose areas that are central to the paper, not tangential.
    - If an area's description includes multiple sub-topics (e.g., "Multilinguality, Machine Translation and Translation Aids"), the paper must genuinely fit the relevant sub-topics, not just one keyword.
    - Prefer fewer, more accurate areas over more, loosely fitting ones.
+   - ONLY include natural human languages (e.g., English, French, Mandarin Chinese). NEVER include programming languages (Python, Java, C++, JavaScript, SQL, Rust, etc.), markup languages (HTML, XML), or formal languages.
+   - Always use the FULL English name of the language, never ISO 639 codes. For example: - Use "Arabic" not "ar" or "ara" - Use "German" not "de" or "deu" - Use "Swahili" not "swa" - Use "English" not "eng"
+   - Normalize language name variants to a single canonical form: - "Mandarin", "Mandarin Chinese", "Chinese (Mandarin)", "Simplified Chinese", "Chinese (Simplified)" → "Chinese" - "Traditional Chinese", "Chinese (Traditional)" → "Chinese" - "Cantonese" should remain "Cantonese" (it is distinct) - "Brazilian Portuguese" → "Portuguese" - "Farsi" → "Persian" - "Panjabi" → "Punjabi" - "Uighur" → "Uyghur" - "isiZulu" → "Zulu" - "isiXhosa" → "Xhosa" - "Bahasa Indonesian" → "Indonesian"
+   - Do NOT include: - Language families (Indo-European, Sino-Tibetan, Polynesian) - Writing systems or scripts (Cyrillic, CJK, Latin) - Dialects listed only as labels (l2-standard, buckeye) - Mathematical or symbolic systems - Sign languages unless the paper specifically studies them
 
 Available research areas:
 * T01 Applications Involving LRs and Evaluation for any area/domain of language and speech processing
