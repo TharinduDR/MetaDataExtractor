@@ -182,25 +182,25 @@ Available research areas:
 * T08 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies
 * T09 Inference and Reasoning
 * T10 Question Answering, Open-domain question answering, closed-domain question answering, extractive and abstractive QA, multi-hop question answering
-* T10 Information Extraction, Named Entity Recognition, Relationship Extraction and Event Detection
-* T11 Interpretability/explainability of language models and language and speech processing tools
-* T12 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
-* T13 Language Modeling (including training, fine-tuning, representation learning, and generation of synthetic data)
-* T14 Lexicon and Semantics
-* T15 Machine Translation (including Speech-to-Speech) and Translation Aids
-* T16 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
-* T17 Text Summarization
-* T18 Text Simplification, Plain Language and Assistive Technologies
-* T19 Opinion & Argument Mining, Offensive Language/ Hate speech/ Toxic Language Detection, Sentiment Analysis, Emotion Recognition/Generation
-* T20 Parsing, Tagging, Chunking, Grammar, Syntax, Morphosyntax, Morphology
-* T21 Psycholinguistics, Cognitive Linguistics and Linguistic Theories
-* T22 Social Media Processing
-* T23 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
-* T24 Legal NLP
-* T25 Clinical/biomedical NLP, NLP for Mental Health and Wellbeing
-* T26 Code generation and programming languages 
-* T27 Authorship Attribution, AI-Generated Text Detection and Provenance
-* T28 NLP for education, Automated essay scoring and feedback generation, grammatical error correction and detection, intelligent tutoring systems
+* T11 Information Extraction, Named Entity Recognition, Relationship Extraction and Event Detection
+* T12 Interpretability/explainability of language models and language and speech processing tools
+* T13 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
+* T14 Language Modeling (including training, fine-tuning, representation learning, and generation of synthetic data)
+* T15 Lexicon and Semantics
+* T16 Machine Translation (including Speech-to-Speech) and Translation Aids
+* T17 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
+* T18 Text Summarization
+* T19 Text Simplification, Plain Language and Assistive Technologies
+* T20 Opinion & Argument Mining, Offensive Language/ Hate speech/ Toxic Language Detection, Sentiment Analysis, Emotion Recognition/Generation
+* T21 Parsing, Tagging, Chunking, Grammar, Syntax, Morphosyntax, Morphology
+* T22 Psycholinguistics, Cognitive Linguistics and Linguistic Theories
+* T23 Social Media Processing
+* T24 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
+* T25 Legal NLP
+* T26 Clinical/biomedical NLP, NLP for Mental Health and Wellbeing
+* T27 Code generation and programming languages 
+* T28 Authorship Attribution, AI-Generated Text Detection and Provenance
+* T29 NLP for education, Automated essay scoring and feedback generation, grammatical error correction and detection, intelligent tutoring systems
 
 Return ONLY a valid JSON object in the following format, with no additional text, explanation, or markdown fences:
 
