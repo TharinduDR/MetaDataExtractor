@@ -2,7 +2,7 @@
 """
 Post-processing script to clean up language fields in metadata JSON files.
 Fixes: programming languages, ISO codes, duplicates, normalization,
-       non-languages, typos, language families, modalities, etc.
+       non-languages, typos, language families, modalities, language pairs, etc.
 
 Usage:
     python cleanup_languages.py /path/to/json/files
@@ -128,6 +128,7 @@ NORMALIZE_MAP = {
 
     # ---- Swahili variants ----
     "Kiswahili": "Swahili",
+    "SwaHili": "Swahili",
 
     # ---- Bengali variants ----
     "Bangla": "Bengali",
@@ -186,12 +187,33 @@ NORMALIZE_MAP = {
     # ---- Oromo variant ----
     "Oromo (West Central)": "Oromo",
 
-    # ---- Filipino / Tagalog ----
-    # Uncomment if you want to merge:
-    # "Filipino": "Tagalog",
+    # ---- Sinhala variants ----
+    "Sinhalese": "Sinhala",
+
+    # ---- Slovenian variants ----
+    "Slovene": "Slovenian",
+
+    # ---- Greek variants ----
+    "Modern Greek": "Greek",
+
+    # ---- Ilocano variants ----
+    "Ilokano": "Ilocano",
+
+    # ---- Urdu variants ----
+    "Roman Urdu": "Urdu",
+
+    # ---- Quechua variants ----
+    "Eastern Apurímac Quechua": "Quechua",
 
     # ---- Sign language normalization ----
     "Sign Language": "Sign Language (unspecified)",
+
+    # ---- African American English ----
+    "African American Vernacular English": "African American English",
+
+    # ---- Filipino / Tagalog ----
+    # Uncomment if you want to merge:
+    # "Filipino": "Tagalog",
 }
 
 # =============================================================================
@@ -212,7 +234,7 @@ PROGRAMMING_LANGUAGES = {
 # =============================================================================
 EXCLUDE_SET = {
     # ---- Writing systems / scripts ----
-    "Cyrillic", "CJK", "Latin", "Devanagari", "Arabic Script",
+    "Cyrillic", "CJK", "Latin script", "Devanagari", "Arabic Script",
 
     # ---- Language families ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -230,6 +252,24 @@ EXCLUDE_SET = {
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
     "Other Languages",
+
+    # ---- Language pairs (not individual languages) ----
+    "English-Macedonian",
+    "English-Albanian",
+    "English-Spanish",
+    "English-French",
+    "English-German",
+    "English-Chinese",
+    "English-Arabic",
+    "English-Hindi",
+    "English-Japanese",
+    "English-Korean",
+    "English-Russian",
+    "English-Portuguese",
+    "English-Turkish",
+    "English-Vietnamese",
+    "English-Thai",
+    "English-Indonesian",
 }
 
 # =============================================================================
@@ -258,6 +298,17 @@ EXCLUDE_CI = _build_case_insensitive_set(EXCLUDE_SET)
 # 5. Core cleanup logic
 # =============================================================================
 
+def is_language_pair(lang):
+    """Check if a string looks like a language pair (e.g., 'English-French')."""
+    if "-" in lang:
+        parts = lang.split("-")
+        if len(parts) == 2:
+            # Check if both parts start with uppercase (likely language names)
+            if parts[0][0].isupper() and parts[1][0].isupper():
+                return True
+    return False
+
+
 def clean_language(lang):
     """
     Clean a single language string.
@@ -274,11 +325,15 @@ def clean_language(lang):
     if lang_lower in EXCLUDE_CI:
         return None
 
+    # Exclude language pairs
+    if is_language_pair(lang):
+        return None
+
     # Normalize known variants (case-insensitive)
     if lang_lower in NORMALIZE_MAP_CI:
         return NORMALIZE_MAP_CI[lang_lower]
 
-    # If it looks like a short ISO code (2-4 lowercase letters), flag it
+    # If it looks like a short ISO code (2-4 lowercase letters), try to resolve
     if len(lang) <= 4 and lang.isalpha() and lang == lang.lower():
         if lang_lower in NORMALIZE_MAP_CI:
             return NORMALIZE_MAP_CI[lang_lower]
@@ -327,23 +382,19 @@ def clean_record(record):
 
     changes = None
     if cleaned != original:
+        # Build normalized pairs for reporting
+        normalized = []
+        for lang in original:
+            result = clean_language(lang)
+            if result is not None and result != lang:
+                normalized.append(f"{lang} → {result}")
+
         changes = {
             "title": record.get("title", "Unknown"),
             "original": original,
             "cleaned": cleaned,
             "removed": removed,
-            "normalized": [
-                f"{o} → {c}"
-                for o, c in zip(original, [clean_language(l) for l in original])
-                if c is not None and o != c
-            ],
-            "deduped": [
-                lang for lang in original
-                if clean_language(lang) is not None
-                and clean_language(lang) in [
-                    clean_language(l) for l in original[:original.index(lang)]
-                ]
-            ],
+            "normalized": normalized,
         }
 
     record["languages"] = cleaned
@@ -408,7 +459,7 @@ def print_before_after_counts(before_counter, after_counter):
 
     print(f"\n  Unique languages BEFORE: {len(before_counter)}")
     print(f"  Unique languages AFTER:  {len(after_counter)}")
-    print(f"  Reduction: {len(before_counter) - len(after_counter)} entries removed\n")
+    print(f"  Reduction: {len(before_counter) - len(after_counter)} entries consolidated\n")
 
     # Items removed entirely
     removed_langs = set(before_counter.keys()) - set(after_counter.keys())
@@ -442,8 +493,11 @@ def print_before_after_counts(before_counter, after_counter):
     for i, (lang, count) in enumerate(after_counter.most_common(50), 1):
         print(f"    {i:3d}. {lang:<45} {count:4d}")
 
+    total_before = sum(before_counter.values())
     total_after = sum(after_counter.values())
-    print(f"\n  Total language occurrences AFTER: {total_after}")
+    print(f"\n  Total occurrences BEFORE: {total_before}")
+    print(f"  Total occurrences AFTER:  {total_after}")
+    print(f"  Removed: {total_before - total_after}")
 
 
 def export_csv(counter, output_path, field_name="item"):
@@ -480,7 +534,7 @@ def main():
     )
     parser.add_argument(
         "--outdir", default=None,
-        help="Write cleaned files to a separate directory (default: overwrite)"
+        help="Write cleaned files to a separate directory (default: overwrite in place)"
     )
     parser.add_argument(
         "--verbose", action="store_true",
