@@ -3,7 +3,8 @@
 Post-processing script to clean up language fields in metadata JSON files.
 Fixes: programming languages, ISO codes, duplicates, normalization,
        non-languages, typos, language families, modalities, language pairs,
-       romanized variants, Arabic dialects, etc.
+       romanized variants, Arabic dialects, Italian dialects, writing systems,
+       nationality/region labels, etc.
 
 Usage:
     python cleanup_languages.py /path/to/json/files
@@ -22,7 +23,9 @@ from pathlib import Path
 # 1. NORMALIZATION MAP: Map variant names to canonical form
 # =============================================================================
 NORMALIZE_MAP = {
-    # ---- Chinese variants ----
+    # =========================================================================
+    # Chinese variants
+    # =========================================================================
     "Mandarin": "Chinese",
     "Mandarin Chinese": "Chinese",
     "Chinese (Mandarin)": "Chinese",
@@ -34,206 +37,378 @@ NORMALIZE_MAP = {
     "cmn": "Chinese",
     "chn": "Chinese",
 
-    # ---- Portuguese variants ----
-    "Brazilian Portuguese": "Portuguese",
-    "ptbr": "Portuguese",
-    "ptmz": "Portuguese",
-
-    # ---- Persian variants ----
-    "Farsi": "Persian",
-    "Western Persian": "Persian",
-
-    # ---- Punjabi variants ----
-    "Panjabi": "Punjabi",
-    "Eastern Panjabi": "Punjabi",
-
-    # ---- Uyghur variants ----
-    "Uighur": "Uyghur",
-
-    # ---- Zulu variants ----
-    "isiZulu": "Zulu",
-    "zul": "Zulu",
-
-    # ---- Xhosa variants ----
-    "isiXhosa": "Xhosa",
-    "xho": "Xhosa",
-
-    # ---- Indonesian variants ----
-    "Bahasa Indonesian": "Indonesian",
-    "ind": "Indonesian",
-
-    # ---- Sesotho / Sotho variants ----
-    "Sotho": "Sesotho",
-    "Southern Sotho": "Sesotho",
-
-    # ---- English variants ----
-    "Standard English": "English",
-    "eng": "English",
-
-    # ---- Arabic variants ----
+    # =========================================================================
+    # Arabic variants & dialects → Arabic
+    # =========================================================================
     "Modern Standard Arabic": "Arabic",
     "Moroccan Arabic": "Arabic",
     "Egyptian Arabic": "Arabic",
+    "Tunisian Arabic": "Arabic",
+    "Chadian Arabic": "Arabic",
     "ar": "Arabic",
     "arq": "Arabic",
     "ary": "Arabic",
 
-    # ---- Azerbaijani variants ----
-    "North Azerbaijani": "Azerbaijani",
-    "Azeri": "Azerbaijani",
-
-    # ---- German variants ----
+    # =========================================================================
+    # German variants
+    # =========================================================================
+    "Standard German": "German",
+    "Austrian German": "German",
     "de": "German",
     "deu": "German",
     "ger": "German",
 
-    # ---- Spanish variants ----
+    # =========================================================================
+    # Portuguese variants
+    # =========================================================================
+    "Brazilian Portuguese": "Portuguese",
+    "Portuguese (African)": "Portuguese",
+    "ptbr": "Portuguese",
+    "ptmz": "Portuguese",
+    "pt": "Portuguese",
+    "por": "Portuguese",
+
+    # =========================================================================
+    # French variants
+    # =========================================================================
+    "French (African)": "French",
+    "fr": "French",
+    "fre": "French",
+
+    # =========================================================================
+    # Spanish variants
+    # =========================================================================
     "es": "Spanish",
     "esp": "Spanish",
     "spa": "Spanish",
 
-    # ---- French variants ----
-    "fr": "French",
-    "fre": "French",
+    # =========================================================================
+    # Persian variants
+    # =========================================================================
+    "Farsi": "Persian",
+    "Western Persian": "Persian",
 
-    # ---- Hindi variants ----
+    # =========================================================================
+    # Hindi variants
+    # =========================================================================
     "hi": "Hindi",
     "hin": "Hindi",
 
-    # ---- Italian variants ----
+    # =========================================================================
+    # Italian variants
+    # =========================================================================
     "it": "Italian",
     "ita": "Italian",
 
-    # ---- Portuguese ISO codes ----
-    "pt": "Portuguese",
-    "por": "Portuguese",
-
-    # ---- Russian ISO codes ----
+    # =========================================================================
+    # Russian ISO codes
+    # =========================================================================
     "ru": "Russian",
 
-    # ---- Other ISO codes ----
+    # =========================================================================
+    # Dutch variants
+    # =========================================================================
+    "Flemish": "Dutch",
+    "dut": "Dutch",
+
+    # =========================================================================
+    # Romanian variants
+    # =========================================================================
+    "Moldavian": "Romanian",
+    "ron": "Romanian",
+
+    # =========================================================================
+    # Bengali variants
+    # =========================================================================
+    "Bangla": "Bengali",
+    "Bengla": "Bengali",
+    "Bengali Romanized": "Bengali",
+
+    # =========================================================================
+    # Telugu variants
+    # =========================================================================
+    "Telugu Romanized": "Telugu",
+
+    # =========================================================================
+    # Punjabi variants
+    # =========================================================================
+    "Panjabi": "Punjabi",
+    "Eastern Panjabi": "Punjabi",
+
+    # =========================================================================
+    # Uyghur variants
+    # =========================================================================
+    "Uighur": "Uyghur",
+
+    # =========================================================================
+    # Zulu variants
+    # =========================================================================
+    "isiZulu": "Zulu",
+    "zul": "Zulu",
+
+    # =========================================================================
+    # Xhosa variants
+    # =========================================================================
+    "isiXhosa": "Xhosa",
+    "xho": "Xhosa",
+
+    # =========================================================================
+    # Indonesian variants
+    # =========================================================================
+    "Bahasa Indonesian": "Indonesian",
+    "ind": "Indonesian",
+
+    # =========================================================================
+    # Sesotho / Sotho variants
+    # =========================================================================
+    "Sotho": "Sesotho",
+    "Southern Sotho": "Sesotho",
+
+    # =========================================================================
+    # English variants
+    # =========================================================================
+    "Standard English": "English",
+    "eng": "English",
+
+    # =========================================================================
+    # Azerbaijani variants
+    # =========================================================================
+    "North Azerbaijani": "Azerbaijani",
+    "Azeri": "Azerbaijani",
+
+    # =========================================================================
+    # Armenian variants
+    # =========================================================================
+    "Western Armenian": "Armenian",
+
+    # =========================================================================
+    # Burmese variants
+    # =========================================================================
+    "Myanmar": "Burmese",
+
+    # =========================================================================
+    # Lao variants
+    # =========================================================================
+    "Laos": "Lao",
+
+    # =========================================================================
+    # Pashto variants
+    # =========================================================================
+    "Southern Pashto": "Pashto",
+    "Pushto": "Pashto",
+
+    # =========================================================================
+    # Shona variants
+    # =========================================================================
+    "ChiShona": "Shona",
+
+    # =========================================================================
+    # Swahili variants
+    # =========================================================================
+    "Kiswahili": "Swahili",
+    "SwaHili": "Swahili",
+    "swa": "Swahili",
+
+    # =========================================================================
+    # Luganda variants
+    # =========================================================================
+    "Ganda": "Luganda",
+
+    # =========================================================================
+    # Setswana variants
+    # =========================================================================
+    "Tswana": "Setswana",
+
+    # =========================================================================
+    # Chichewa / Nyanja variants
+    # =========================================================================
+    "Chewa": "Chichewa",
+    "Nyanja": "Chichewa",
+
+    # =========================================================================
+    # Latvian variants
+    # =========================================================================
+    "Standard Latvian": "Latvian",
+
+    # =========================================================================
+    # Malay variants
+    # =========================================================================
+    "Standard Malay": "Malay",
+
+    # =========================================================================
+    # Norwegian variants
+    # =========================================================================
+    "Norwegian Bokmål": "Norwegian",
+
+    # =========================================================================
+    # Malagasy variants
+    # =========================================================================
+    "Plateau Malagasy": "Malagasy",
+
+    # =========================================================================
+    # Uzbek variants
+    # =========================================================================
+    "Northern Uzbek": "Uzbek",
+
+    # =========================================================================
+    # Bambara variants
+    # =========================================================================
+    "Bamanankan": "Bambara",
+
+    # =========================================================================
+    # Nigerian Pidgin variants
+    # =========================================================================
+    "Nigerian-Pidgin": "Nigerian Pidgin",
+
+    # =========================================================================
+    # Slovenian variants
+    # =========================================================================
+    "Slovene": "Slovenian",
+
+    # =========================================================================
+    # Sinhala variants
+    # =========================================================================
+    "Sinhalese": "Sinhala",
+
+    # =========================================================================
+    # Greek variants
+    # =========================================================================
+    "Modern Greek": "Greek",
+
+    # =========================================================================
+    # Ilocano variants
+    # =========================================================================
+    "Ilokano": "Ilocano",
+
+    # =========================================================================
+    # Urdu variants
+    # =========================================================================
+    "Roman Urdu": "Urdu",
+
+    # =========================================================================
+    # Quechua variants
+    # =========================================================================
+    "Eastern Apurímac Quechua": "Quechua",
+    "Cusco Quechua": "Quechua",
+
+    # =========================================================================
+    # Mongolian variants
+    # =========================================================================
+    "Halh Mongolian": "Mongolian",
+
+    # =========================================================================
+    # Navajo variants
+    # =========================================================================
+    "Navaho": "Navajo",
+
+    # =========================================================================
+    # Odia variants
+    # =========================================================================
+    "Oriya": "Odia",
+
+    # =========================================================================
+    # Oromo variants
+    # =========================================================================
+    "Oromo (West Central)": "Oromo",
+    "Afaan Oromo": "Oromo",
+
+    # =========================================================================
+    # Haitian Creole variants
+    # =========================================================================
+    "Haitian": "Haitian Creole",
+
+    # =========================================================================
+    # Maori variants (diacritic normalization)
+    # =========================================================================
+    "Māori": "Maori",
+    "C.I. Māori": "Cook Islands Maori",
+    "Cook Islands Māori": "Cook Islands Maori",
+
+    # =========================================================================
+    # Sami variants (diacritic normalization)
+    # =========================================================================
+    "Sámi": "Sami",
+
+    # =========================================================================
+    # Upper Sorbian variants
+    # =========================================================================
+    "Sorbian (Upper)": "Upper Sorbian",
+
+    # =========================================================================
+    # Manipuri variants
+    # =========================================================================
+    "Meitei": "Manipuri",
+
+    # =========================================================================
+    # Frisian variants
+    # =========================================================================
+    "West Frisian": "Frisian",
+
+    # =========================================================================
+    # Fulfulde / Fula variants
+    # =========================================================================
+    "Fulfulde (Nigerian)": "Fulfulde",
+
+    # =========================================================================
+    # Kurdish variants (keep Kurdish as canonical)
+    # =========================================================================
+    "Kurmanji Kurdish": "Kurdish",
+
+    # =========================================================================
+    # Italian dialect labels → standalone dialect names
+    # =========================================================================
+    "Italian (Sicilian)": "Sicilian",
+    "Italian (Neapolitan)": "Neapolitan",
+    "Italian (Tuscan)": "Tuscan",
+    "Italian (Venetian)": "Venetian",
+    "Italian (Emilian)": "Emilian",
+    "Italian (Lombard)": "Lombard",
+    "Italian (Friulian)": "Friulian",
+    "Italian (Sardinian)": "Sardinian",
+
+    # =========================================================================
+    # Diacritic / accent variants
+    # =========================================================================
+    "Yorùbá": "Yoruba",
+    "Éwé": "Ewe",
+    "Gà": "Ga",
+    "Asháninka": "Ashaninka",
+
+    # =========================================================================
+    # Typos
+    # =========================================================================
+    "Malayam": "Malayalam",
+    "Urdi": "Urdu",
+    "Galacian": "Galician",
+    "Glacian": "Galician",
+    "Komi-Ziran": "Komi-Zyrian",
+    "Alsacian": "Alsatian",
+
+    # =========================================================================
+    # Sign language normalization
+    # =========================================================================
+    "Sign Language": "Sign Language (unspecified)",
+
+    # =========================================================================
+    # African American English
+    # =========================================================================
+    "African American Vernacular English": "African American English",
+
+    # =========================================================================
+    # Other ISO codes
+    # =========================================================================
     "afr": "Afrikaans",
     "hau": "Hausa",
     "jav": "Javanese",
     "kin": "Kinyarwanda",
     "mar": "Marathi",
     "pcm": "Nigerian Pidgin",
-    "ron": "Romanian",
     "sun": "Sundanese",
     "swe": "Swedish",
-    "swa": "Swahili",
     "tat": "Tatar",
     "ukr": "Ukrainian",
     "vmw": "Makhuwa",
     "yor": "Yoruba",
-    "dut": "Dutch",
-
-    # ---- Shona variants ----
-    "ChiShona": "Shona",
-
-    # ---- Swahili variants ----
-    "Kiswahili": "Swahili",
-    "SwaHili": "Swahili",
-
-    # ---- Bengali variants ----
-    "Bangla": "Bengali",
-    "Bengali Romanized": "Bengali",
-
-    # ---- Telugu variants ----
-    "Telugu Romanized": "Telugu",
-
-    # ---- Luganda variants ----
-    "Ganda": "Luganda",
-
-    # ---- Setswana variants ----
-    "Tswana": "Setswana",
-
-    # ---- Chichewa / Nyanja variants ----
-    "Chewa": "Chichewa",
-    "Nyanja": "Chichewa",
-
-    # ---- Latvian variants ----
-    "Standard Latvian": "Latvian",
-
-    # ---- Malay variants ----
-    "Standard Malay": "Malay",
-
-    # ---- Norwegian variants ----
-    "Norwegian Bokmål": "Norwegian",
-
-    # ---- Pashto variants ----
-    "Southern Pashto": "Pashto",
-
-    # ---- Malagasy variants ----
-    "Plateau Malagasy": "Malagasy",
-
-    # ---- Uzbek variants ----
-    "Northern Uzbek": "Uzbek",
-
-    # ---- Bambara variants ----
-    "Bamanankan": "Bambara",
-
-    # ---- Nigerian Pidgin variants ----
-    "Nigerian-Pidgin": "Nigerian Pidgin",
-
-    # ---- Burmese variants ----
-    "Myanmar": "Burmese",
-
-    # ---- Slovenian variants ----
-    "Slovene": "Slovenian",
-
-    # ---- Sinhala variants ----
-    "Sinhalese": "Sinhala",
-
-    # ---- Greek variants ----
-    "Modern Greek": "Greek",
-
-    # ---- Ilocano variants ----
-    "Ilokano": "Ilocano",
-
-    # ---- Urdu variants ----
-    "Roman Urdu": "Urdu",
-
-    # ---- Quechua variants ----
-    "Eastern Apurímac Quechua": "Quechua",
-    "Cusco Quechua": "Quechua",
-
-    # ---- Mongolian variants ----
-    "Halh Mongolian": "Mongolian",
-
-    # ---- Navajo variants ----
-    "Navaho": "Navajo",
-
-    # ---- Odia variants ----
-    "Oriya": "Odia",
-
-    # ---- Diacritic / accent variants ----
-    "Yorùbá": "Yoruba",
-    "Éwé": "Ewe",
-    "Gà": "Ga",
-
-    # ---- Typos ----
-    "Malayam": "Malayalam",
-    "Urdi": "Urdu",
-    "Galacian": "Galician",
-    "Glacian": "Galician",
-    "Komi-Ziran": "Komi-Zyrian",
-
-    # ---- Fulfulde variant ----
-    "Fulfulde (Nigerian)": "Fulfulde",
-
-    # ---- Oromo variant ----
-    "Oromo (West Central)": "Oromo",
-
-    # ---- Sign language normalization ----
-    "Sign Language": "Sign Language (unspecified)",
-
-    # ---- African American English ----
-    "African American Vernacular English": "African American English",
-
-    # ---- Filipino / Tagalog ----
-    # Uncomment if you want to merge:
-    # "Filipino": "Tagalog",
 }
 
 # =============================================================================
@@ -254,7 +429,9 @@ PROGRAMMING_LANGUAGES = {
 # =============================================================================
 EXCLUDE_SET = {
     # ---- Writing systems / scripts ----
-    "Cyrillic", "CJK", "Latin script", "Devanagari", "Arabic Script",
+    "Cyrillic", "CJK", "Latin script", "Latin", "Devanagari",
+    "Arabic Script", "Baybayin", "Lontara", "Thaana", "Takri",
+    "Prachalit", "Sylheti Nagri",
 
     # ---- Language families ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -262,6 +439,8 @@ EXCLUDE_SET = {
     "Turkic", "Uralic", "Malayo-Polynesian", "Hokan",
     "Mixe-Zoque", "Pama-Nyungan", "Trans-New Guinea",
     "Araucanian", "Oto-Manguean", "Mande",
+    "Nilo-Saharan", "Edoid",
+    "Romance languages", "Polynesian languages",
 
     # ---- Dataset / corpus names that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -269,28 +448,27 @@ EXCLUDE_SET = {
     # ---- Modalities (not languages) ----
     "Audio", "Video", "Acoustic", "Visual",
 
+    # ---- Nationalities / regions (not languages) ----
+    "British", "East Asian", "Indian",
+
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
-    "Other Languages",
-    "Unassigned",
+    "Other Languages", "Other",
+    "Unassigned", "Artificial",
 
     # ---- Language pairs (not individual languages) ----
-    "English-Macedonian",
-    "English-Albanian",
-    "English-Spanish",
-    "English-French",
-    "English-German",
-    "English-Chinese",
-    "English-Arabic",
-    "English-Hindi",
-    "English-Japanese",
-    "English-Korean",
-    "English-Russian",
-    "English-Portuguese",
-    "English-Turkish",
-    "English-Vietnamese",
-    "English-Thai",
-    "English-Indonesian",
+    "English-Macedonian", "English-Albanian",
+    "English-Spanish", "English-French",
+    "English-German", "English-Chinese",
+    "English-Arabic", "English-Hindi",
+    "English-Japanese", "English-Korean",
+    "English-Russian", "English-Portuguese",
+    "English-Turkish", "English-Vietnamese",
+    "English-Thai", "English-Indonesian",
+    "Spanish-English", "French-English",
+    "German-English", "Chinese-English",
+    "Arabic-English", "Hindi-English",
+    "Japanese-English", "Korean-English",
 }
 
 # =============================================================================
@@ -314,6 +492,19 @@ NORMALIZE_MAP_CI = _build_case_insensitive_map(NORMALIZE_MAP)
 PROGRAMMING_CI = _build_case_insensitive_set(PROGRAMMING_LANGUAGES)
 EXCLUDE_CI = _build_case_insensitive_set(EXCLUDE_SET)
 
+# Known non-pairs: hyphenated names that are NOT language pairs
+KNOWN_NON_PAIRS = {
+    "komi-zyrian", "komi-ziran", "min dong", "shipibo-konibo",
+    "serbo-croatian", "kazakh-russian sign language",
+    "guinea kpelle", "kok borok", "hiri motu",
+    "cook islands maori", "cook islands māori",
+    "sri lankan malay", "hawaiian pidgin",
+    "haitian creole", "reunionese creole",
+    "seychellois creole", "louisiana creole",
+    "early new high german", "old church slavonic",
+    "central bikol",
+}
+
 
 # =============================================================================
 # 5. Core cleanup logic
@@ -321,19 +512,21 @@ EXCLUDE_CI = _build_case_insensitive_set(EXCLUDE_SET)
 
 def is_language_pair(lang):
     """Check if a string looks like a language pair (e.g., 'English-French')."""
-    if "-" in lang:
-        parts = lang.split("-")
-        if len(parts) == 2:
-            # Both parts start with uppercase → likely language pair
-            if (len(parts[0]) > 1 and parts[0][0].isupper() and
-                len(parts[1]) > 1 and parts[1][0].isupper()):
-                # Exclude known non-pairs (e.g., "Min-Dong" is not a pair)
-                known_non_pairs = {
-                    "min dong", "komi-zyrian", "komi-ziran",
-                    "old church slavonic",
-                }
-                if lang.lower() not in known_non_pairs:
-                    return True
+    if "-" not in lang:
+        return False
+
+    # Check against known non-pairs first
+    if lang.lower() in KNOWN_NON_PAIRS:
+        return False
+
+    parts = lang.split("-")
+    if len(parts) == 2:
+        p1, p2 = parts[0].strip(), parts[1].strip()
+        # Both parts start with uppercase and are multi-char → likely a pair
+        if (len(p1) > 1 and p1[0].isupper() and
+            len(p2) > 1 and p2[0].isupper()):
+            return True
+
     return False
 
 
@@ -524,6 +717,13 @@ def print_before_after_counts(before_counter, after_counter):
     for i, (lang, count) in enumerate(after_counter.most_common(50), 1):
         print(f"    {i:3d}. {lang:<45} {count:4d}")
 
+    # Show full list if more than 50
+    remaining = after_counter.most_common()[50:]
+    if remaining:
+        print(f"\n  Remaining {len(remaining)} languages:")
+        for i, (lang, count) in enumerate(remaining, 51):
+            print(f"    {i:3d}. {lang:<45} {count:4d}")
+
     total_before = sum(before_counter.values())
     total_after = sum(after_counter.values())
     print(f"\n  Total occurrences BEFORE: {total_before}")
@@ -609,16 +809,13 @@ Examples:
         print(f"Loaded {len(records)} records from {args.path}")
 
         for record in records:
-            # Count before
             for lang in record.get("languages", []):
                 before_counter[lang] += 1
 
-            # Clean
             _, changes = clean_record(record)
             if changes:
                 all_changes.append(changes)
 
-            # Count after
             for lang in record.get("languages", []):
                 after_counter[lang] += 1
 
@@ -640,16 +837,13 @@ Examples:
             records = data if isinstance(data, list) else [data]
 
             for record in records:
-                # Count before
                 for lang in record.get("languages", []):
                     before_counter[lang] += 1
 
-                # Clean
                 _, changes = clean_record(record)
                 if changes:
                     all_changes.append(changes)
 
-                # Count after
                 for lang in record.get("languages", []):
                     after_counter[lang] += 1
 
