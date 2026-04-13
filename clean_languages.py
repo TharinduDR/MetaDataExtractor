@@ -2,7 +2,8 @@
 """
 Post-processing script to clean up language fields in metadata JSON files.
 Fixes: programming languages, ISO codes, duplicates, normalization,
-       non-languages, typos, language families, modalities, language pairs, etc.
+       non-languages, typos, language families, modalities, language pairs,
+       romanized variants, Arabic dialects, etc.
 
 Usage:
     python cleanup_languages.py /path/to/json/files
@@ -29,6 +30,7 @@ NORMALIZE_MAP = {
     "Simplified Chinese": "Chinese",
     "Chinese (Traditional)": "Chinese",
     "Traditional Chinese": "Chinese",
+    "Classical Chinese": "Chinese",
     "cmn": "Chinese",
     "chn": "Chinese",
 
@@ -70,12 +72,15 @@ NORMALIZE_MAP = {
 
     # ---- Arabic variants ----
     "Modern Standard Arabic": "Arabic",
+    "Moroccan Arabic": "Arabic",
+    "Egyptian Arabic": "Arabic",
     "ar": "Arabic",
     "arq": "Arabic",
     "ary": "Arabic",
 
     # ---- Azerbaijani variants ----
     "North Azerbaijani": "Azerbaijani",
+    "Azeri": "Azerbaijani",
 
     # ---- German variants ----
     "de": "German",
@@ -132,6 +137,10 @@ NORMALIZE_MAP = {
 
     # ---- Bengali variants ----
     "Bangla": "Bengali",
+    "Bengali Romanized": "Bengali",
+
+    # ---- Telugu variants ----
+    "Telugu Romanized": "Telugu",
 
     # ---- Luganda variants ----
     "Ganda": "Luganda",
@@ -167,31 +176,14 @@ NORMALIZE_MAP = {
     # ---- Nigerian Pidgin variants ----
     "Nigerian-Pidgin": "Nigerian Pidgin",
 
-    # ---- Diacritic / accent variants ----
-    "Yorùbá": "Yoruba",
-    "Éwé": "Ewe",
-    "Gà": "Ga",
-
-    # ---- Typos ----
-    "Malayam": "Malayalam",
-    "Urdi": "Urdu",
-    "Galacian": "Galician",
-    "Komi-Ziran": "Komi-Zyrian",
-
-    # ---- Oriya → Odia (modern name) ----
-    "Oriya": "Odia",
-
-    # ---- Fulfulde variant ----
-    "Fulfulde (Nigerian)": "Fulfulde",
-
-    # ---- Oromo variant ----
-    "Oromo (West Central)": "Oromo",
-
-    # ---- Sinhala variants ----
-    "Sinhalese": "Sinhala",
+    # ---- Burmese variants ----
+    "Myanmar": "Burmese",
 
     # ---- Slovenian variants ----
     "Slovene": "Slovenian",
+
+    # ---- Sinhala variants ----
+    "Sinhalese": "Sinhala",
 
     # ---- Greek variants ----
     "Modern Greek": "Greek",
@@ -204,6 +196,34 @@ NORMALIZE_MAP = {
 
     # ---- Quechua variants ----
     "Eastern Apurímac Quechua": "Quechua",
+    "Cusco Quechua": "Quechua",
+
+    # ---- Mongolian variants ----
+    "Halh Mongolian": "Mongolian",
+
+    # ---- Navajo variants ----
+    "Navaho": "Navajo",
+
+    # ---- Odia variants ----
+    "Oriya": "Odia",
+
+    # ---- Diacritic / accent variants ----
+    "Yorùbá": "Yoruba",
+    "Éwé": "Ewe",
+    "Gà": "Ga",
+
+    # ---- Typos ----
+    "Malayam": "Malayalam",
+    "Urdi": "Urdu",
+    "Galacian": "Galician",
+    "Glacian": "Galician",
+    "Komi-Ziran": "Komi-Zyrian",
+
+    # ---- Fulfulde variant ----
+    "Fulfulde (Nigerian)": "Fulfulde",
+
+    # ---- Oromo variant ----
+    "Oromo (West Central)": "Oromo",
 
     # ---- Sign language normalization ----
     "Sign Language": "Sign Language (unspecified)",
@@ -252,6 +272,7 @@ EXCLUDE_SET = {
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
     "Other Languages",
+    "Unassigned",
 
     # ---- Language pairs (not individual languages) ----
     "English-Macedonian",
@@ -303,9 +324,16 @@ def is_language_pair(lang):
     if "-" in lang:
         parts = lang.split("-")
         if len(parts) == 2:
-            # Check if both parts start with uppercase (likely language names)
-            if parts[0][0].isupper() and parts[1][0].isupper():
-                return True
+            # Both parts start with uppercase → likely language pair
+            if (len(parts[0]) > 1 and parts[0][0].isupper() and
+                len(parts[1]) > 1 and parts[1][0].isupper()):
+                # Exclude known non-pairs (e.g., "Min-Dong" is not a pair)
+                known_non_pairs = {
+                    "min dong", "komi-zyrian", "komi-ziran",
+                    "old church slavonic",
+                }
+                if lang.lower() not in known_non_pairs:
+                    return True
     return False
 
 
@@ -411,6 +439,9 @@ def load_json_files(directory):
     json_files = sorted(Path(directory).glob("*.json"))
 
     for filepath in json_files:
+        # Skip summary/meta files
+        if filepath.name.startswith("_"):
+            continue
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -518,7 +549,25 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Clean up language fields in metadata JSON files."
+        description="Clean up language fields in metadata JSON files.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Preview changes (recommended first step)
+  python cleanup_languages.py /path/to/json/files --dry-run --verbose
+
+  # Apply changes in place
+  python cleanup_languages.py /path/to/json/files
+
+  # Apply changes to a separate directory
+  python cleanup_languages.py /path/to/json/files --outdir cleaned/
+
+  # Combined JSON file
+  python cleanup_languages.py combined.json --combined --dry-run --verbose
+
+  # Export CSV reports
+  python cleanup_languages.py /path/to/json/files --export-csv --outdir results/
+        """
     )
     parser.add_argument(
         "path",
