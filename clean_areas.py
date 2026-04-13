@@ -62,15 +62,31 @@ CANONICAL_AREAS = {
 # 2. EXPLICIT OVERRIDE MAP
 #    Maps known variant strings (exact match) to their canonical key.
 #    Covers: bare codes, truncated labels, partial labels, old numbering,
-#    misassignments, and all variants seen in production data.
+#    misassignments, non-zero-padded codes, and all variants seen in data.
 # =============================================================================
 EXPLICIT_OVERRIDES = {
+    # =======================================================================
+    # BARE CODES WITHOUT LEADING ZERO (T1→T01, T2→T02, etc.)
+    # =======================================================================
+    "T1": "T01",
+    "T2": "T02",
+    "T3": "T03",
+    "T4": "T04",
+    "T5": "T05",
+    "T6": "T06",
+    "T7": "T07",
+    "T8": "T08",
+    "T9": "T09",
+
     # =======================================================================
     # T01 Bias
     # =======================================================================
     "T01": "T01",
     "T01 Bias, Guardrails, filters": "T01",
     "T01 Bias": "T01",
+    # Non-zero-padded variants
+    "T1 Bias, Guardrails, filters": "T01",
+    "T1 Bias": "T01",
 
     # =======================================================================
     # T02 Corpora
@@ -78,6 +94,9 @@ EXPLICIT_OVERRIDES = {
     "T02": "T02",
     "T02 Corpora, Treebanks and Annotation; Tools, Systems and Platforms": "T02",
     "T02 Corpora": "T02",
+    # Non-zero-padded
+    "T2 Corpora, Treebanks and Annotation; Tools, Systems and Platforms": "T02",
+    "T2 Corpora": "T02",
     # Old schema (was T03)
     "T03 Corpora, Treebanks and Annotation; Tools, Systems and Platforms": "T02",
 
@@ -87,8 +106,12 @@ EXPLICIT_OVERRIDES = {
     "T03": "T03",
     "T03 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction": "T03",
     "T03 Dialogue": "T03",
+    # Non-zero-padded
+    "T3 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction": "T03",
+    "T3 Dialogue": "T03",
     # Old schema (was T04)
     "T04 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction": "T03",
+    "T4 Dialogue, Conversational Systems, Chatbots, Human-Robot Interaction": "T03",
 
     # =======================================================================
     # T04 Digital Humanities
@@ -96,9 +119,13 @@ EXPLICIT_OVERRIDES = {
     "T04": "T04",
     "T04 Digital Humanities": "T04",
     "T04 Digital Humanities, Cultural Heritage and Computational Social Science": "T04",
+    # Non-zero-padded
+    "T4 Digital Humanities": "T04",
+    "T4 Digital Humanities, Cultural Heritage and Computational Social Science": "T04",
     # Old schema (was T05)
     "T05 Digital Humanities, Cultural Heritage and Computational Social Science": "T04",
     "T05 Digital Humanities": "T04",
+    "T5 Digital Humanities, Cultural Heritage and Computational Social Science": "T04",
 
     # =======================================================================
     # T05 Discourse
@@ -106,8 +133,12 @@ EXPLICIT_OVERRIDES = {
     "T05": "T05",
     "T05 Discourse and Pragmatics": "T05",
     "T05 Discourse": "T05",
+    # Non-zero-padded
+    "T5 Discourse and Pragmatics": "T05",
+    "T5 Discourse": "T05",
     # Old schema (was T06)
     "T06 Discourse and Pragmatics": "T05",
+    "T6 Discourse and Pragmatics": "T05",
 
     # =======================================================================
     # T06 Information Retrieval
@@ -115,9 +146,13 @@ EXPLICIT_OVERRIDES = {
     "T06": "T06",
     "T06 Information Retrieval and Cross-lingual Retrieval": "T06",
     "T06 Information Retrieval": "T06",
+    # Non-zero-padded
+    "T6 Information Retrieval and Cross-lingual Retrieval": "T06",
+    "T6 Information Retrieval": "T06",
     # Old schema (was T07)
     "T07 Information Retrieval and Cross-lingual Retrieval": "T06",
     "T07 Document Classification, Information Retrieval and Cross-lingual Retrieval": "T06",
+    "T7 Information Retrieval and Cross-lingual Retrieval": "T06",
 
     # =======================================================================
     # T07 Ethics
@@ -125,8 +160,12 @@ EXPLICIT_OVERRIDES = {
     "T07": "T07",
     "T07 Ethics, Research Reproducibility and Replicability, and Environmental Issues": "T07",
     "T07 Ethics": "T07",
+    # Non-zero-padded
+    "T7 Ethics, Research Reproducibility and Replicability, and Environmental Issues": "T07",
+    "T7 Ethics": "T07",
     # Old schema (was T08)
     "T08 Ethics, Research Reproducibility and Replicability, and Environmental Issues": "T07",
+    "T8 Ethics, Research Reproducibility and Replicability, and Environmental Issues": "T07",
 
     # =======================================================================
     # T08 Evaluation
@@ -134,8 +173,12 @@ EXPLICIT_OVERRIDES = {
     "T08": "T08",
     "T08 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies": "T08",
     "T08 Evaluation": "T08",
+    # Non-zero-padded
+    "T8 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies": "T08",
+    "T8 Evaluation": "T08",
     # Old schema (was T09)
     "T09 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies": "T08",
+    "T9 Evaluation, Validation, Quality Assurance and Benchmarking Methodologies": "T08",
 
     # =======================================================================
     # T09 Inference and Reasoning
@@ -143,6 +186,9 @@ EXPLICIT_OVERRIDES = {
     "T09": "T09",
     "T09 Inference and Reasoning": "T09",
     "T09 Inference": "T09",
+    # Non-zero-padded
+    "T9 Inference and Reasoning": "T09",
+    "T9 Inference": "T09",
     # Old schema (was T10)
     "T10 Inference and Reasoning": "T09",
     "T10 Inference, Reasoning, Question Answering": "T09",
@@ -381,7 +427,6 @@ EXPLICIT_OVERRIDES = {
 
     # =======================================================================
     # VERY OLD SCHEMA mappings (LREC-style T-codes)
-    # These come from an older numbering where codes were different
     # =======================================================================
     "T01 Applications Involving LRs and Evaluation for any area/domain of language and speech processing": "T08",
 }
@@ -389,21 +434,7 @@ EXPLICIT_OVERRIDES = {
 
 # =============================================================================
 # 3. KEYWORD-BASED FALLBACK RESOLUTION
-#    When exact match fails but we have a T-code, use keywords to disambiguate
 # =============================================================================
-
-KEYWORD_RULES = {
-    "T10": {
-        "keywords": {"QUESTION ANSWERING", "QA", "OPEN-DOMAIN", "CLOSED-DOMAIN", "MULTI-HOP"},
-        "target": "T10",
-    },
-    "T11": {
-        "keywords": {"INFORMATION EXTRACTION", "NAMED ENTITY", "NER", "RELATIONSHIP EXTRACTION", "EVENT DETECTION"},
-        "target": "T11",
-    },
-}
-
-# For bare T10 with no keywords, we need to check content
 T11_KEYWORDS = {"INFORMATION EXTRACTION", "NAMED ENTITY", "NER", "RELATIONSHIP EXTRACTION", "EVENT DETECTION"}
 T10_KEYWORDS = {"QUESTION ANSWERING", "QA", "OPEN-DOMAIN", "CLOSED-DOMAIN", "MULTI-HOP"}
 
@@ -413,10 +444,15 @@ T10_KEYWORDS = {"QUESTION ANSWERING", "QA", "OPEN-DOMAIN", "CLOSED-DOMAIN", "MUL
 # =============================================================================
 
 def extract_code(area_string):
-    """Extract the T-code from a research area string."""
-    match = re.match(r"^(T\d+)", area_string.strip())
+    """
+    Extract the T-code from a research area string, normalizing to zero-padded.
+    E.g., 'T3 Dialogue...' → 'T03', 'T14 Language...' → 'T14'
+    """
+    match = re.match(r"^(T)(\d+)", area_string.strip())
     if match:
-        return match.group(1)
+        prefix = match.group(1)
+        number = int(match.group(2))
+        return f"{prefix}{number:02d}"
     return None
 
 
@@ -438,12 +474,12 @@ def clean_research_area(area):
         if override_key.lower() == area_lower:
             return CANONICAL_AREAS[canonical_key]
 
-    # 3. Extract T-code and try keyword-based resolution
+    # 3. Extract T-code (now zero-padded) and try keyword-based resolution
     code = extract_code(area)
     if code:
         area_upper = area.upper()
 
-        # Special: disambiguate T10 (old shared code for QA + IE)
+        # Special: disambiguate old T10 (shared code for QA + IE)
         if code == "T10":
             if any(kw in area_upper for kw in T11_KEYWORDS):
                 return CANONICAL_AREAS["T11"]
