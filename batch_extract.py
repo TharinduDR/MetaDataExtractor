@@ -1,11 +1,11 @@
 """
 Batch metadata extraction for ACL Anthology volumes.
 
-Given an ACL Anthology volume URL (e.g., https://aclanthology.org/volumes/2025.acl-long/),
-this script:
-1. Scrapes all paper IDs from the volume page
+Given an ACL Anthology volume URL (e.g., https://aclanthology.org/volumes/2025.acl-long/
+or https://aclanthology.org/volumes/D18-1/), this script:
+1. Scrapes all paper IDs from the volume page (supports both modern and old-style IDs)
 2. For each paper: downloads PDF -> extracts metadata -> deletes PDF
-3. Saves a JSON file per paper (e.g., 2025.acl-long.39.json)
+3. Saves a JSON file per paper (e.g., 2025.acl-long.39.json or D18-1001.json)
 
 This processes one paper at a time to minimise disk usage.
 Use --keep_pdfs to retain downloaded PDFs.
@@ -15,6 +15,7 @@ Usage:
 
 Examples:
     python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/
+    python batch_extract_metadata.py https://aclanthology.org/volumes/D18-1/
     python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-short/ --output_dir ./results --max_pages 4
     python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/ --start_from 2025.acl-long.50
     python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/ --keep_pdfs
@@ -55,15 +56,42 @@ def load_model(model_name="Qwen/Qwen3-VL-8B-Instruct"):
 # ACL Anthology scraping
 # ============================================================
 
+def _trailing_num(pid):
+    """Extract the trailing numeric portion of a paper ID."""
+    m = re.search(r'\d+$', pid)
+    return m.group() if m else ""
+
+
+def _is_frontmatter(pid, volume_id):
+    """
+    Detect volume frontmatter / proceedings-front entries.
+
+    Conventions:
+      - Modern IDs: '<volume_id>.0'           e.g. '2025.acl-long.0'
+      - Old-style:  '<volume_id>000' or
+                    '<volume_id>0000'         e.g. 'D18-1000', 'P19-10000'
+    """
+    if pid == f"{volume_id}.0":
+        return True
+    if re.fullmatch(rf'{re.escape(volume_id)}0+', pid):
+        return True
+    return False
+
+
 def get_paper_ids_from_volume(volume_url):
     """
     Scrape paper IDs from an ACL Anthology volume page.
 
+    Supports both ID formats:
+      - Modern: '2025.acl-long.39'   (dot separator, no zero-padding)
+      - Old:    'D18-1001'           (no separator, zero-padded)
+
     Args:
         volume_url: e.g., https://aclanthology.org/volumes/2025.acl-long/
+                    or    https://aclanthology.org/volumes/D18-1/
 
     Returns:
-        List of paper IDs like ['2025.acl-long.1', '2025.acl-long.2', ...]
+        Sorted list of paper IDs.
     """
     print(f"Fetching volume page: {volume_url}")
 
@@ -72,32 +100,38 @@ def get_paper_ids_from_volume(volume_url):
     html = response.text
 
     # Extract the volume prefix from URL
-    # https://aclanthology.org/volumes/2025.acl-long/ -> 2025.acl-long
-    volume_match = re.search(r'/volumes/([^/]+)/?', volume_url)
+    volume_match = re.search(r'/volumes/([^/?#]+)/?', volume_url)
     if not volume_match:
         raise ValueError(f"Could not extract volume ID from URL: {volume_url}")
     volume_id = volume_match.group(1)
 
-    # Find all paper IDs in the HTML
-    # PDFs are linked as https://aclanthology.org/2025.acl-long.1.pdf
-    pattern = rf'({re.escape(volume_id)}\.\d+)\.pdf'
-    paper_ids = sorted(set(re.findall(pattern, html)),
-                       key=lambda x: int(x.split('.')[-1]))
+    # Try modern format first: <volume_id>.<num>.pdf
+    modern_pattern = rf'({re.escape(volume_id)}\.\d+)\.pdf'
+    paper_ids = set(re.findall(modern_pattern, html))
 
-    # Filter out paper ID .0 (that's the frontmatter/proceedings itself)
-    paper_ids = [pid for pid in paper_ids if not pid.endswith('.0')]
+    # Fall back to old format: <volume_id><num>.pdf (no separator)
+    if not paper_ids:
+        old_pattern = rf'({re.escape(volume_id)}\d+)\.pdf'
+        paper_ids = set(re.findall(old_pattern, html))
+
+    # Sort numerically by trailing number
+    paper_ids = sorted(paper_ids, key=lambda x: int(_trailing_num(x)))
+
+    # Filter out frontmatter
+    paper_ids = [pid for pid in paper_ids if not _is_frontmatter(pid, volume_id)]
 
     print(f"Found {len(paper_ids)} papers in volume {volume_id}")
     return paper_ids
 
 
-def download_pdf(paper_id, download_dir):
+def download_pdf(paper_id, download_dir, max_retries=3):
     """
-    Download a PDF from ACL Anthology.
+    Download a PDF from ACL Anthology, with retries and backoff.
 
     Args:
-        paper_id: e.g., '2025.acl-long.39'
+        paper_id: e.g., '2025.acl-long.39' or 'D18-1001'
         download_dir: Directory to save PDFs
+        max_retries: Number of attempts before giving up
 
     Returns:
         Path to downloaded PDF, or None if failed
@@ -109,29 +143,43 @@ def download_pdf(paper_id, download_dir):
     if os.path.exists(pdf_path):
         return pdf_path
 
-    try:
-        response = requests.get(pdf_url, timeout=60)
-        response.raise_for_status()
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(pdf_url, timeout=60)
+            response.raise_for_status()
 
-        with open(pdf_path, 'wb') as f:
-            f.write(response.content)
+            with open(pdf_path, 'wb') as f:
+                f.write(response.content)
 
-        return pdf_path
+            return pdf_path
 
-    except Exception as e:
-        print(f"  ERROR downloading {paper_id}: {e}")
-        return None
+        except Exception as e:
+            last_err = e
+            if attempt < max_retries:
+                backoff = 2 ** (attempt - 1)  # 1s, 2s, 4s
+                time.sleep(backoff)
+
+    print(f"  ERROR downloading {paper_id} after {max_retries} attempts: {last_err}")
+    return None
 
 
 # ============================================================
 # PDF to images
 # ============================================================
 
-def pdf_to_images(pdf_path, scale=2.0):
-    """Convert PDF pages to PIL Images using pypdfium2"""
+def pdf_to_images(pdf_path, scale=2.0, max_pages=None):
+    """Convert PDF pages to PIL Images using pypdfium2.
+
+    Args:
+        pdf_path: Path to the PDF.
+        scale: Rendering scale factor.
+        max_pages: If given, only render the first N pages.
+    """
     pdf = pdfium.PdfDocument(pdf_path)
     images = []
-    for page_number in range(len(pdf)):
+    n_pages = len(pdf) if max_pages is None else min(len(pdf), max_pages)
+    for page_number in range(n_pages):
         page = pdf[page_number]
         pil_image = page.render(scale=scale).to_pil()
         images.append(pil_image)
@@ -152,23 +200,36 @@ Given this research paper, extract the following metadata and return it as a JSO
 
 2. **authors**: A list of all authors as they appear in the paper.
 
-3. **languages**: A list of languages the paper actually conducted experiments on or evaluated. 
+3. **languages**: A list of languages the paper actually conducted experiments on or evaluated.
    - Only include languages where results are reported.
    - Do NOT include languages that were merely mentioned, discussed as future work, or dropped/eliminated from the study.
+   - ONLY include natural human languages (e.g., English, French, Mandarin Chinese). NEVER include programming languages (Python, Java, C++, JavaScript, SQL, Rust, etc.), markup languages (HTML, XML), or formal languages.
+   - Always use the FULL English name of the language, never ISO 639 codes. For example:
+     - Use "Arabic" not "ar" or "ara"
+     - Use "German" not "de" or "deu"
+     - Use "Swahili" not "swa"
+     - Use "English" not "eng"
+   - Normalize language name variants to a single canonical form:
+     - "Mandarin", "Mandarin Chinese", "Chinese (Mandarin)", "Simplified Chinese", "Chinese (Simplified)" → "Chinese"
+     - "Traditional Chinese", "Chinese (Traditional)" → "Chinese"
+     - "Cantonese" should remain "Cantonese" (it is distinct)
+     - "Brazilian Portuguese" → "Portuguese"
+     - "Farsi" → "Persian"
+     - "Panjabi" → "Punjabi"
+     - "Uighur" → "Uyghur"
+     - "isiZulu" → "Zulu"
+     - "isiXhosa" → "Xhosa"
+     - "Bahasa Indonesian" → "Indonesian"
+   - Do NOT include:
+     - Language families (Indo-European, Sino-Tibetan, Polynesian)
+     - Writing systems or scripts (Cyrillic, CJK, Latin)
+     - Dialects listed only as labels (l2-standard, buckeye)
+     - Mathematical or symbolic systems
+     - Sign languages unless the paper specifically studies them
 
 4. **research_areas**: Select between 1 and 3 research areas from the list below that best describe the paper's core contributions. Be strict and selective:
    - Only choose areas that are central to the paper, not tangential.
    - If an area's description includes multiple sub-topics (e.g., "Multilinguality, Machine Translation and Translation Aids"), the paper must genuinely fit the relevant sub-topics, not just one keyword.
-   - Prefer fewer, more accurate areas over more, loosely fitting ones.
-   - ONLY include natural human languages (e.g., English, French, Mandarin Chinese). NEVER include programming languages (Python, Java, C++, JavaScript, SQL, Rust, etc.), markup languages (HTML, XML), or formal languages.
-   - Always use the FULL English name of the language, never ISO 639 codes. For example: - Use "Arabic" not "ar" or "ara" - Use "German" not "de" or "deu" - Use "Swahili" not "swa" - Use "English" not "eng"
-   - Normalize language name variants to a single canonical form: - "Mandarin", "Mandarin Chinese", "Chinese (Mandarin)", "Simplified Chinese", "Chinese (Simplified)" → "Chinese" - "Traditional Chinese", "Chinese (Traditional)" → "Chinese" - "Cantonese" should remain "Cantonese" (it is distinct) - "Brazilian Portuguese" → "Portuguese" - "Farsi" → "Persian" - "Panjabi" → "Punjabi" - "Uighur" → "Uyghur" - "isiZulu" → "Zulu" - "isiXhosa" → "Xhosa" - "Bahasa Indonesian" → "Indonesian"
-   - Do NOT include: - Language families (Indo-European, Sino-Tibetan, Polynesian) - Writing systems or scripts (Cyrillic, CJK, Latin) - Dialects listed only as labels (l2-standard, buckeye) - Mathematical or symbolic systems - Sign languages unless the paper specifically studies them
-
-
-4. **research_areas**: Select between 1 and 3 research areas from the list below that best describe the paper's core contributions. Be strict and selective:
-   - Only choose areas that are central to the paper, not tangential.
-   - If an area's description includes multiple sub-topics (e.g., "Machine Translation and Translation Aids"), the paper must genuinely fit the relevant sub-topics, not just one keyword.
    - Prefer fewer, more accurate areas over more, loosely fitting ones.
 
 Available research areas:
@@ -198,7 +259,7 @@ Available research areas:
 * T24 Speech Resources and Processing (including Phonetic Databases, Phonology, Prosody, Speech Recognition, Synthesis and Spoken Language Understanding)
 * T25 Legal NLP
 * T26 Clinical/biomedical NLP, NLP for Mental Health and Wellbeing
-* T27 Code generation and programming languages 
+* T27 Code generation and programming languages
 * T28 Authorship Attribution, AI-Generated Text Detection and Provenance
 * T29 NLP for education, Automated essay scoring and feedback generation, grammatical error correction and detection, intelligent tutoring systems
 
@@ -217,12 +278,11 @@ Return ONLY a valid JSON object in the following format, with no additional text
 # ============================================================
 
 def extract_metadata_from_pdf(model, processor, pdf_path, max_pages=5):
-    """Extract metadata from a single PDF using the model"""
-    images = pdf_to_images(pdf_path)
-    pages_to_use = images
+    """Extract metadata from a single PDF using the model."""
+    images = pdf_to_images(pdf_path, max_pages=max_pages)
 
     content = []
-    for img in pages_to_use:
+    for img in images:
         content.append({"type": "image", "image": img})
     content.append({"type": "text", "text": METADATA_EXTRACTION_PROMPT})
 
@@ -240,7 +300,6 @@ def extract_metadata_from_pdf(model, processor, pdf_path, max_pages=5):
     generated_ids = model.generate(
         **inputs,
         max_new_tokens=2048,
-        temperature=0.1,
         do_sample=False
     )
 
@@ -259,7 +318,7 @@ def extract_metadata_from_pdf(model, processor, pdf_path, max_pages=5):
 
 
 def parse_json_output(output_text):
-    """Parse JSON from model output with multiple fallback strategies"""
+    """Parse JSON from model output with multiple fallback strategies."""
     # Try direct parse
     try:
         return json.loads(output_text.strip())
@@ -291,7 +350,7 @@ def parse_json_output(output_text):
 
 def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
                    max_pages=5, start_from=None, keep_pdfs=False,
-                   model_name="Qwen/Qwen3-VL-32B-Instruct"):
+                   model_name="Qwen/Qwen3-VL-8B-Instruct"):
     """
     Process an entire ACL Anthology volume one paper at a time:
     download PDF -> extract metadata -> delete PDF -> next paper.
@@ -301,7 +360,7 @@ def process_volume(volume_url, output_dir="./output", pdf_dir="./pdfs",
         output_dir: Directory for output JSON files
         pdf_dir: Directory for downloaded PDFs
         max_pages: Max pages per paper to send to model
-        start_from: Paper ID to resume from (e.g., '2025.acl-long.50')
+        start_from: Paper ID to resume from (e.g., '2025.acl-long.50' or 'D18-1050')
         keep_pdfs: If True, keep PDFs after processing instead of deleting
         model_name: HuggingFace model name
     """
@@ -448,6 +507,7 @@ def main():
         epilog="""
 Examples:
   python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/
+  python batch_extract_metadata.py https://aclanthology.org/volumes/D18-1/
   python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-short/ --output_dir ./short_results
   python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/ --start_from 2025.acl-long.50
   python batch_extract_metadata.py https://aclanthology.org/volumes/2025.acl-long/ --keep_pdfs
@@ -463,7 +523,7 @@ Examples:
     parser.add_argument("--max_pages", type=int, default=5,
                         help="Max pages per paper to process (default: 5)")
     parser.add_argument("--start_from", default=None,
-                        help="Paper ID to resume from (e.g., 2025.acl-long.50)")
+                        help="Paper ID to resume from (e.g., 2025.acl-long.50 or D18-1050)")
     parser.add_argument("--keep_pdfs", action="store_true",
                         help="Keep PDFs after processing instead of deleting them")
     parser.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct",
