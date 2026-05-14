@@ -50,6 +50,7 @@ NORMALIZE_MAP = {
     "Chadian Arabic": "Arabic",
     "Levantine Arabic": "Arabic",
     "Gulf Arabic": "Arabic",
+    "Levantine": "Arabic",
     "ar": "Arabic",
     "arq": "Arabic",
     "ary": "Arabic",
@@ -78,6 +79,8 @@ NORMALIZE_MAP = {
     # French variants
     # =========================================================================
     "French (African)": "French",
+    "Canadian French": "French",
+    "Hexagonal French": "French",
     "fr": "French",
     "fre": "French",
 
@@ -86,6 +89,7 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Argentine Spanish": "Spanish",
     "Peninsular Spanish": "Spanish",
+    "Mexican Spanish": "Spanish",
     "es": "Spanish",
     "esp": "Spanish",
     "spa": "Spanish",
@@ -196,7 +200,13 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Standard English": "English",
     "American English": "English",
+    "M. English": "English",
     "eng": "English",
+
+    # =========================================================================
+    # Hebrew variants
+    # =========================================================================
+    "Modern Hebrew": "Hebrew",
 
     # =========================================================================
     # Azerbaijani variants
@@ -268,6 +278,11 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Norwegian Bokmål": "Norwegian",
     "Norwegian Nynorsk": "Norwegian",
+    "Norwegian (Bokmål)": "Norwegian",
+    "Norwegian (Nynorsk)": "Norwegian",
+    "Bokmål": "Norwegian",
+    "Bokmal": "Norwegian",
+    "Nynorsk": "Norwegian",
 
     # =========================================================================
     # Malagasy variants
@@ -355,9 +370,14 @@ NORMALIZE_MAP = {
     "Cook Islands Māori": "Cook Islands Maori",
 
     # =========================================================================
-    # Sami variants (diacritic normalization)
+    # Sami variants (diacritic + transliteration normalization)
+    # All variants → Northern Sami (most specific standard name)
     # =========================================================================
-    "Sámi": "Sami",
+    "Sámi": "Northern Sami",
+    "Sami": "Northern Sami",
+    "Saami": "Northern Sami",
+    "North Sami": "Northern Sami",
+    "North Sámi": "Northern Sami",
 
     # =========================================================================
     # Upper Sorbian variants
@@ -384,6 +404,8 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Kurmanji Kurdish": "Kurdish",
     "Sorani Kurdish": "Kurdish",
+    "Kurmanji": "Kurdish",
+    "Sorani": "Kurdish",
 
     # =========================================================================
     # Italian dialect labels → standalone dialect names
@@ -436,6 +458,26 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Réunion Creole": "Reunionese Creole",
     "Reunion Creole": "Reunionese Creole",
+
+    # =========================================================================
+    # Greenlandic / Kalaallisut (same language)
+    # =========================================================================
+    "Kalaallisut": "Greenlandic",
+
+    # =========================================================================
+    # Komi-Zyrian variants (space → hyphen canonical form)
+    # =========================================================================
+    "Komi Zyrian": "Komi-Zyrian",
+
+    # =========================================================================
+    # Belarusian variants
+    # =========================================================================
+    "Belorussian": "Belarusian",
+
+    # =========================================================================
+    # Kirundi / Rundi
+    # =========================================================================
+    "Rundi": "Kirundi",
 
     # =========================================================================
     # Old Church Slavonic (underscore variant)
@@ -501,17 +543,20 @@ EXCLUDE_SET = {
     "Romance languages", "Polynesian languages",
     "Slavic", "South-Slavic languages",
     "Kanak languages", "Kru languages",
+    "Oceanic", "Gur", "Cahuapanan", "Totonacan",
 
-    # ---- Dataset / corpus names that leaked in ----
+    # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
+    "Syntagrus", "German PUD",
 
     # ---- Modalities (not languages) ----
     "Audio", "Video", "Acoustic", "Visual",
 
-    # ---- Nationalities / regions (not languages) ----
+    # ---- Nationalities / regions / countries (not languages) ----
     "British", "East Asian", "Indian",
     "Singaporean", "Philippine", "Pakistani",
     "Colombian", "Malaysian",
+    "Papua New Guinea", "Goroka",
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
