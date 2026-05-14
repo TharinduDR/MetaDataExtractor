@@ -32,8 +32,10 @@ NORMALIZE_MAP = {
     "Chinese (Mandarin)": "Chinese",
     "Chinese (Simplified)": "Chinese",
     "Simplified Chinese": "Chinese",
+    "Chinese-simplified": "Chinese",
     "Chinese (Traditional)": "Chinese",
     "Traditional Chinese": "Chinese",
+    "Chinese-traditional": "Chinese",
     "Classical Chinese": "Chinese",
     "cmn": "Chinese",
     "chn": "Chinese",
@@ -46,6 +48,8 @@ NORMALIZE_MAP = {
     "Egyptian Arabic": "Arabic",
     "Tunisian Arabic": "Arabic",
     "Chadian Arabic": "Arabic",
+    "Levantine Arabic": "Arabic",
+    "Gulf Arabic": "Arabic",
     "ar": "Arabic",
     "arq": "Arabic",
     "ary": "Arabic",
@@ -63,6 +67,7 @@ NORMALIZE_MAP = {
     # Portuguese variants
     # =========================================================================
     "Brazilian Portuguese": "Portuguese",
+    "European Portuguese": "Portuguese",
     "Portuguese (African)": "Portuguese",
     "ptbr": "Portuguese",
     "ptmz": "Portuguese",
@@ -79,6 +84,8 @@ NORMALIZE_MAP = {
     # =========================================================================
     # Spanish variants
     # =========================================================================
+    "Argentine Spanish": "Spanish",
+    "Peninsular Spanish": "Spanish",
     "es": "Spanish",
     "esp": "Spanish",
     "spa": "Spanish",
@@ -88,6 +95,8 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Farsi": "Persian",
     "Western Persian": "Persian",
+    "Dari": "Persian",
+    "Tajik Persian": "Persian",
 
     # =========================================================================
     # Hindi variants
@@ -160,10 +169,27 @@ NORMALIZE_MAP = {
     "ind": "Indonesian",
 
     # =========================================================================
-    # Sesotho / Sotho variants
+    # Sesotho / Sotho variants (Southern Sotho)
     # =========================================================================
     "Sotho": "Sesotho",
     "Southern Sotho": "Sesotho",
+
+    # =========================================================================
+    # Northern Sotho / Sepedi variants
+    # (Sesotho sa Leboa = Sesotho sa Lebowa = Northern Sotho = Sepedi)
+    # =========================================================================
+    "Sesotho sa Leboa": "Northern Sotho",
+    "Sesotho sa Lebowa": "Northern Sotho",
+    "Sepedi": "Northern Sotho",
+
+    # =========================================================================
+    # Other South African Bantu-prefix collapses
+    # =========================================================================
+    "isiNdebele": "Ndebele",
+    "SiSwati": "Swazi",
+    "Swati": "Swazi",
+    "Tshivenda": "Venda",
+    "Xitsonga": "Tsonga",
 
     # =========================================================================
     # English variants
@@ -241,6 +267,7 @@ NORMALIZE_MAP = {
     # Norwegian variants
     # =========================================================================
     "Norwegian Bokmål": "Norwegian",
+    "Norwegian Nynorsk": "Norwegian",
 
     # =========================================================================
     # Malagasy variants
@@ -297,6 +324,7 @@ NORMALIZE_MAP = {
     # Mongolian variants
     # =========================================================================
     "Halh Mongolian": "Mongolian",
+    "Khalkha": "Mongolian",
 
     # =========================================================================
     # Navajo variants
@@ -355,6 +383,7 @@ NORMALIZE_MAP = {
     # Kurdish variants (keep Kurdish as canonical)
     # =========================================================================
     "Kurmanji Kurdish": "Kurdish",
+    "Sorani Kurdish": "Kurdish",
 
     # =========================================================================
     # Italian dialect labels → standalone dialect names
@@ -401,6 +430,22 @@ NORMALIZE_MAP = {
     # Sign language normalization
     # =========================================================================
     "Sign Language": "Sign Language (unspecified)",
+
+    # =========================================================================
+    # Reunionese Creole variants
+    # =========================================================================
+    "Réunion Creole": "Reunionese Creole",
+    "Reunion Creole": "Reunionese Creole",
+
+    # =========================================================================
+    # Old Church Slavonic (underscore variant)
+    # =========================================================================
+    "Old_Church_Slavonic": "Old Church Slavonic",
+
+    # =========================================================================
+    # Latin treebank-suffixed variants → Latin
+    # =========================================================================
+    "Latin PROIEL": "Latin",
 
     # =========================================================================
     # African American English
@@ -454,6 +499,8 @@ EXCLUDE_SET = {
     "Araucanian", "Oto-Manguean", "Mande",
     "Nilo-Saharan", "Edoid",
     "Romance languages", "Polynesian languages",
+    "Slavic", "South-Slavic languages",
+    "Kanak languages", "Kru languages",
 
     # ---- Dataset / corpus names that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -463,6 +510,8 @@ EXCLUDE_SET = {
 
     # ---- Nationalities / regions (not languages) ----
     "British", "East Asian", "Indian",
+    "Singaporean", "Philippine", "Pakistani",
+    "Colombian", "Malaysian",
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
