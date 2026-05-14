@@ -15,7 +15,7 @@ from pathlib import Path
 def load_json_files(directory):
     """Load all JSON files from a directory."""
     records = []
-    json_files = sorted(Path(directory).glob("*.json"))
+    json_files = sorted(Path(directory).rglob("*.json"))
 
     for filepath in json_files:
         try:
