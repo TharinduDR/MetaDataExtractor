@@ -9,6 +9,7 @@ Fixes: programming languages, ISO codes, duplicates, normalization,
 Usage:
     python cleanup_languages.py /path/to/json/files
     python cleanup_languages.py /path/to/json/files --dry-run --verbose
+    python cleanup_languages.py /path/to/json/files --no-recursive  # top-level only
     python cleanup_languages.py combined.json --combined
     python cleanup_languages.py /path/to/json/files --outdir cleaned/
 """
@@ -168,6 +169,7 @@ NORMALIZE_MAP = {
     # English variants
     # =========================================================================
     "Standard English": "English",
+    "American English": "English",
     "eng": "English",
 
     # =========================================================================
@@ -383,6 +385,17 @@ NORMALIZE_MAP = {
     "Glacian": "Galician",
     "Komi-Ziran": "Komi-Zyrian",
     "Alsacian": "Alsatian",
+    "Kinyabwana": "Kinyarwanda",
+
+    # =========================================================================
+    # Tigrinya variants
+    # =========================================================================
+    "Tigrigna": "Tigrinya",
+
+    # =========================================================================
+    # Serbo-Croatian (user choice: merge into Serbian)
+    # =========================================================================
+    "Serbo-Croatian": "Serbian",
 
     # =========================================================================
     # Sign language normalization
@@ -626,10 +639,19 @@ def clean_record(record):
 # 6. File I/O
 # =============================================================================
 
-def load_json_files(directory):
-    """Load all JSON files from a directory, returning (filepath, data) pairs."""
+def load_json_files(directory, recursive=True):
+    """
+    Load all JSON files from a directory, returning (filepath, data) pairs.
+
+    When recursive=True (default), walks subdirectories too.
+    Filepaths are returned as Path objects so that callers can compute
+    a relative path against `directory` and preserve subdirectory
+    structure when writing output.
+    """
     results = []
-    json_files = sorted(Path(directory).glob("*.json"))
+    base = Path(directory)
+    pattern_fn = base.rglob if recursive else base.glob
+    json_files = sorted(pattern_fn("*.json"))
 
     for filepath in json_files:
         # Skip summary/meta files
@@ -640,13 +662,15 @@ def load_json_files(directory):
                 data = json.load(f)
             results.append((filepath, data))
         except (json.JSONDecodeError, Exception) as e:
-            print(f"  [WARN] Skipping {filepath.name}: {e}")
+            print(f"  [WARN] Skipping {filepath}: {e}")
 
     return results
 
 
 def save_json(filepath, data):
-    """Save data to a JSON file with nice formatting."""
+    """Save data to a JSON file with nice formatting. Creates parent dirs."""
+    filepath = Path(filepath)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -753,13 +777,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Preview changes (recommended first step)
+  # Preview changes (recommended first step) — walks subdirectories
   python cleanup_languages.py /path/to/json/files --dry-run --verbose
+
+  # Top-level only (do NOT descend into subdirectories)
+  python cleanup_languages.py /path/to/json/files --no-recursive
 
   # Apply changes in place
   python cleanup_languages.py /path/to/json/files
 
-  # Apply changes to a separate directory
+  # Apply changes to a separate directory (subdirectory structure preserved)
   python cleanup_languages.py /path/to/json/files --outdir cleaned/
 
   # Combined JSON file
@@ -783,7 +810,7 @@ Examples:
     )
     parser.add_argument(
         "--outdir", default=None,
-        help="Write cleaned files to a separate directory (default: overwrite in place)"
+        help="Write cleaned files to a separate directory (default: overwrite in place). Subdirectory structure is preserved."
     )
     parser.add_argument(
         "--verbose", action="store_true",
@@ -793,9 +820,14 @@ Examples:
         "--export-csv", action="store_true",
         help="Export before/after counts to CSV"
     )
+    parser.add_argument(
+        "--no-recursive", action="store_true",
+        help="Do NOT descend into subdirectories (default: recursive)"
+    )
 
     args = parser.parse_args()
 
+    recursive = not args.no_recursive
     all_changes = []
     before_counter = Counter()
     after_counter = Counter()
@@ -830,8 +862,10 @@ Examples:
 
     # ---- Directory of JSON files ----
     else:
-        file_data = load_json_files(args.path)
-        print(f"Loaded {len(file_data)} files from {args.path}")
+        base = Path(args.path)
+        file_data = load_json_files(args.path, recursive=recursive)
+        mode = "recursively" if recursive else "(top-level only)"
+        print(f"Loaded {len(file_data)} files from {args.path} {mode}")
 
         for filepath, data in file_data:
             records = data if isinstance(data, list) else [data]
@@ -849,8 +883,9 @@ Examples:
 
             if not args.dry_run:
                 if args.outdir:
-                    os.makedirs(args.outdir, exist_ok=True)
-                    outpath = Path(args.outdir) / filepath.name
+                    # Preserve subdirectory structure under --outdir
+                    rel = filepath.relative_to(base)
+                    outpath = Path(args.outdir) / rel
                 else:
                     outpath = filepath
 

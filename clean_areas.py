@@ -12,6 +12,7 @@ Canonical areas (from batch_extract.py):
 
 Usage:
     python cleanup_research_areas.py /path/to/json/files --dry-run --verbose
+    python cleanup_research_areas.py /path/to/json/files --no-recursive
     python cleanup_research_areas.py combined.json --combined --dry-run --verbose
     python cleanup_research_areas.py /path/to/json/files --outdir cleaned/
     python cleanup_research_areas.py /path/to/json/files  # in-place
@@ -546,10 +547,17 @@ def clean_record(record):
 # 5. File I/O
 # =============================================================================
 
-def load_json_files(directory):
-    """Load all JSON files from a directory, skipping non-data files."""
+def load_json_files(directory, recursive=True):
+    """
+    Load all JSON files from a directory, skipping non-data files.
+
+    When recursive=True (default), walks subdirectories too.
+    """
     results = []
-    json_files = sorted(Path(directory).glob("*.json"))
+    base = Path(directory)
+    pattern_fn = base.rglob if recursive else base.glob
+    json_files = sorted(pattern_fn("*.json"))
+
     for filepath in json_files:
         # Skip summary/meta files
         if filepath.name.startswith("_"):
@@ -559,12 +567,14 @@ def load_json_files(directory):
                 data = json.load(f)
             results.append((filepath, data))
         except (json.JSONDecodeError, Exception) as e:
-            print(f"  [WARN] Skipping {filepath.name}: {e}")
+            print(f"  [WARN] Skipping {filepath}: {e}")
     return results
 
 
 def save_json(filepath, data):
-    """Save data to a JSON file."""
+    """Save data to a JSON file. Creates parent directories if needed."""
+    filepath = Path(filepath)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -667,13 +677,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Preview changes (recommended first step)
+  # Preview changes (recommended first step) — walks subdirectories
   python cleanup_research_areas.py /path/to/json/files --dry-run --verbose
+
+  # Top-level only (do NOT descend into subdirectories)
+  python cleanup_research_areas.py /path/to/json/files --no-recursive
 
   # Apply changes in place
   python cleanup_research_areas.py /path/to/json/files
 
-  # Apply changes to a separate directory
+  # Apply changes to a separate directory (subdirectory structure preserved)
   python cleanup_research_areas.py /path/to/json/files --outdir cleaned/
 
   # Combined JSON file
@@ -686,12 +699,14 @@ Examples:
     parser.add_argument("path", help="Directory of JSON files or a single combined JSON file")
     parser.add_argument("--combined", action="store_true", help="Treat path as a single combined JSON file")
     parser.add_argument("--dry-run", action="store_true", help="Preview changes without modifying files")
-    parser.add_argument("--outdir", default=None, help="Write cleaned files to a separate directory (default: overwrite in place)")
+    parser.add_argument("--outdir", default=None, help="Write cleaned files to a separate directory (default: overwrite in place). Subdirectory structure is preserved.")
     parser.add_argument("--verbose", action="store_true", help="Print detailed change log")
     parser.add_argument("--export-csv", action="store_true", help="Export before/after counts to CSV")
+    parser.add_argument("--no-recursive", action="store_true", help="Do NOT descend into subdirectories (default: recursive)")
 
     args = parser.parse_args()
 
+    recursive = not args.no_recursive
     all_changes = []
     before_counter = Counter()
     after_counter = Counter()
@@ -721,8 +736,10 @@ Examples:
             print(f"Saved cleaned data to {outpath}")
 
     else:
-        file_data = load_json_files(args.path)
-        print(f"Loaded {len(file_data)} files from {args.path}")
+        base = Path(args.path)
+        file_data = load_json_files(args.path, recursive=recursive)
+        mode = "recursively" if recursive else "(top-level only)"
+        print(f"Loaded {len(file_data)} files from {args.path} {mode}")
 
         for filepath, data in file_data:
             records = data if isinstance(data, list) else [data]
@@ -737,8 +754,9 @@ Examples:
 
             if not args.dry_run:
                 if args.outdir:
-                    os.makedirs(args.outdir, exist_ok=True)
-                    outpath = Path(args.outdir) / filepath.name
+                    # Preserve subdirectory structure under --outdir
+                    rel = filepath.relative_to(base)
+                    outpath = Path(args.outdir) / rel
                 else:
                     outpath = filepath
                 save_json(outpath, data)
