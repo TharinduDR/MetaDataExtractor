@@ -4,7 +4,8 @@ Post-processing script to clean up language fields in metadata JSON files.
 Fixes: programming languages, ISO codes, duplicates, normalization,
        non-languages, typos, language families, modalities, language pairs,
        romanized variants, Arabic dialects, Italian dialects, writing systems,
-       nationality/region labels, etc.
+       nationality/region labels, regional varieties of major languages,
+       ALL-CAPS entries, underscore/hyphen variants, etc.
 
 Usage:
     python cleanup_languages.py /path/to/json/files
@@ -25,7 +26,9 @@ from pathlib import Path
 # =============================================================================
 NORMALIZE_MAP = {
     # =========================================================================
-    # Chinese variants
+    # Chinese variants  (Mandarin and unspecified Chinese only → Chinese.
+    # Cantonese, Min Nan, Hakka, Wu, etc. are KEPT SEPARATE since they have
+    # their own ISO 639-3 codes (yue, nan, hak, wuu, ...).)
     # =========================================================================
     "Mandarin": "Chinese",
     "Mandarin Chinese": "Chinese",
@@ -39,6 +42,8 @@ NORMALIZE_MAP = {
     "Classical Chinese": "Chinese",
     "cmn": "Chinese",
     "chn": "Chinese",
+    "zh": "Chinese",
+    "zho": "Chinese",
 
     # =========================================================================
     # Arabic variants & dialects → Arabic
@@ -50,6 +55,8 @@ NORMALIZE_MAP = {
     "Chadian Arabic": "Arabic",
     "Levantine Arabic": "Arabic",
     "Gulf Arabic": "Arabic",
+    "Iraqi Arabic": "Arabic",
+    "Maghrebi Arabic": "Arabic",
     "Levantine": "Arabic",
     "ar": "Arabic",
     "arq": "Arabic",
@@ -60,6 +67,7 @@ NORMALIZE_MAP = {
     # =========================================================================
     "Standard German": "German",
     "Austrian German": "German",
+    "Middle-High-German": "Middle High German",
     "de": "German",
     "deu": "German",
     "ger": "German",
@@ -70,6 +78,7 @@ NORMALIZE_MAP = {
     "Brazilian Portuguese": "Portuguese",
     "European Portuguese": "Portuguese",
     "Portuguese (African)": "Portuguese",
+    "Brazilian": "Portuguese",
     "ptbr": "Portuguese",
     "ptmz": "Portuguese",
     "pt": "Portuguese",
@@ -81,6 +90,8 @@ NORMALIZE_MAP = {
     "French (African)": "French",
     "Canadian French": "French",
     "Hexagonal French": "French",
+    "French (Quebec)": "French",
+    "Middle French": "French",
     "fr": "French",
     "fre": "French",
 
@@ -90,6 +101,9 @@ NORMALIZE_MAP = {
     "Argentine Spanish": "Spanish",
     "Peninsular Spanish": "Spanish",
     "Mexican Spanish": "Spanish",
+    "Caribbean Spanish": "Spanish",
+    "European Spanish": "Spanish",
+    "Latin American Spanish": "Spanish",
     "es": "Spanish",
     "esp": "Spanish",
     "spa": "Spanish",
@@ -118,12 +132,15 @@ NORMALIZE_MAP = {
     # Russian ISO codes
     # =========================================================================
     "ru": "Russian",
+    "rus": "Russian",
 
     # =========================================================================
     # Dutch variants
     # =========================================================================
     "Flemish": "Dutch",
+    "West Flemish": "Dutch",
     "dut": "Dutch",
+    "nld": "Dutch",
 
     # =========================================================================
     # Romanian variants
@@ -137,11 +154,15 @@ NORMALIZE_MAP = {
     "Bangla": "Bengali",
     "Bengla": "Bengali",
     "Bengali Romanized": "Bengali",
+    "West Bengali": "Bengali",
+    "ben": "Bengali",
+    "bn": "Bengali",
 
     # =========================================================================
     # Telugu variants
     # =========================================================================
     "Telugu Romanized": "Telugu",
+    "tel": "Telugu",
 
     # =========================================================================
     # Punjabi variants
@@ -180,7 +201,6 @@ NORMALIZE_MAP = {
 
     # =========================================================================
     # Northern Sotho / Sepedi variants
-    # (Sesotho sa Leboa = Sesotho sa Lebowa = Northern Sotho = Sepedi)
     # =========================================================================
     "Sesotho sa Leboa": "Northern Sotho",
     "Sesotho sa Lebowa": "Northern Sotho",
@@ -196,23 +216,31 @@ NORMALIZE_MAP = {
     "Xitsonga": "Tsonga",
 
     # =========================================================================
-    # English variants
+    # English variants (regional varieties collapse to English)
     # =========================================================================
     "Standard English": "English",
     "American English": "English",
+    "American": "English",
+    "British English": "English",
+    "British": "English",
+    "Gen. American English": "English",
+    "General American English": "English",
     "M. English": "English",
     "eng": "English",
+    "en": "English",
 
     # =========================================================================
     # Hebrew variants
     # =========================================================================
     "Modern Hebrew": "Hebrew",
+    "heb": "Hebrew",
 
     # =========================================================================
-    # Azerbaijani variants
+    # Azerbaijani variants (also "Azerbaijani Turkish" → Azerbaijani)
     # =========================================================================
     "North Azerbaijani": "Azerbaijani",
     "Azeri": "Azerbaijani",
+    "Azerbaijani Turkish": "Azerbaijani",
 
     # =========================================================================
     # Armenian variants
@@ -300,9 +328,10 @@ NORMALIZE_MAP = {
     "Bamanankan": "Bambara",
 
     # =========================================================================
-    # Nigerian Pidgin variants
+    # Nigerian Pidgin variants (Naija = colloquial name for Nigerian Pidgin)
     # =========================================================================
     "Nigerian-Pidgin": "Nigerian Pidgin",
+    "Naija": "Nigerian Pidgin",
 
     # =========================================================================
     # Slovenian variants
@@ -350,6 +379,7 @@ NORMALIZE_MAP = {
     # Odia variants
     # =========================================================================
     "Oriya": "Odia",
+    "Odiya": "Odia",
 
     # =========================================================================
     # Oromo variants
@@ -370,19 +400,45 @@ NORMALIZE_MAP = {
     "Cook Islands Māori": "Cook Islands Maori",
 
     # =========================================================================
-    # Sami variants (diacritic + transliteration normalization)
-    # All variants → Northern Sami (most specific standard name)
+    # Sami variants — collapse ALL to "Northern Sami" except dialects with
+    # their own ISO codes (Skolt Sami, Pite Saami → kept; standardise casing)
+    # NOTE: Generic "Sami"/"Saami"/"North Sami"/"North_Sami" → Northern Sami
     # =========================================================================
     "Sámi": "Northern Sami",
     "Sami": "Northern Sami",
     "Saami": "Northern Sami",
     "North Sami": "Northern Sami",
     "North Sámi": "Northern Sami",
+    "North_Sami": "Northern Sami",
+    "Northern Sámi": "Northern Sami",
+    "Northern Saami": "Northern Sami",
+    "Pite Saami": "Pite Sami",
+    # Skolt Sami stays as-is (distinct ISO code: sms)
 
     # =========================================================================
-    # Upper Sorbian variants
+    # Sorbian variants (canonical: "Upper Sorbian", "Lower Sorbian")
     # =========================================================================
     "Sorbian (Upper)": "Upper Sorbian",
+    "Upper_Sorbian": "Upper Sorbian",
+    "Sorbian Upper": "Upper Sorbian",
+
+    # =========================================================================
+    # Old Church Slavonic variants
+    # =========================================================================
+    "Old-Church-Slavonic": "Old Church Slavonic",
+    "Old_Church_Slavonic": "Old Church Slavonic",
+    "Old Slavic": "Old Church Slavonic",
+
+    # =========================================================================
+    # Cree variants — collapse "Plain Cree" typo, keep dialects distinct
+    # (Plains Cree, East Cree have separate ISO codes; bare "Cree" → Cree)
+    # =========================================================================
+    "Plain Cree": "Plains Cree",
+
+    # =========================================================================
+    # Shipibo-Konibo casing
+    # =========================================================================
+    "Shipibo-konibo": "Shipibo-Konibo",
 
     # =========================================================================
     # Manipuri variants
@@ -400,7 +456,7 @@ NORMALIZE_MAP = {
     "Fulfulde (Nigerian)": "Fulfulde",
 
     # =========================================================================
-    # Kurdish variants (keep Kurdish as canonical)
+    # Kurdish variants
     # =========================================================================
     "Kurmanji Kurdish": "Kurdish",
     "Sorani Kurdish": "Kurdish",
@@ -426,6 +482,27 @@ NORMALIZE_MAP = {
     "Éwé": "Ewe",
     "Gà": "Ga",
     "Asháninka": "Ashaninka",
+    "Bâsâa": "Basaa",
+    "Paraguayan Guaraní": "Guarani",
+    "Murrinh-patha": "Murrinhpatha",
+
+    # =========================================================================
+    # Sakha / Yakut variants (Sakha is the modern preferred name)
+    # =========================================================================
+    "Sakha (Yakut)": "Sakha",
+    "Yakut": "Sakha",
+    "YAKUT": "Sakha",
+
+    # =========================================================================
+    # ALL-CAPS variants → proper case
+    # =========================================================================
+    "LOKAA": "Lokaa",
+    "KIKONGO": "Kongo",
+    "Kikongo": "Kongo",
+    "Koongo": "Kongo",
+    "IMDLAWN TASHLHIYT": "Tashelhiyt",
+    "Imdlawn Tashlhiyt": "Tashelhiyt",
+    "Berber": "Tashelhiyt",  # ambiguous family name → most common variant
 
     # =========================================================================
     # Typos
@@ -444,14 +521,26 @@ NORMALIZE_MAP = {
     "Tigrigna": "Tigrinya",
 
     # =========================================================================
-    # Serbo-Croatian (user choice: merge into Serbian)
+    # Serbo-Croatian (merge into Serbian)
     # =========================================================================
     "Serbo-Croatian": "Serbian",
+
+    # =========================================================================
+    # Montenegrin → Serbian (mutually intelligible; user's prior decision
+    # was to merge Serbo-Croatian into Serbian — apply same policy)
+    # =========================================================================
+    # NOTE: leaving Montenegrin alone — only 2 records, distinct standard.
+    # If user wants it merged, uncomment:
+    # "Montenegrin": "Serbian",
 
     # =========================================================================
     # Sign language normalization
     # =========================================================================
     "Sign Language": "Sign Language (unspecified)",
+    "Swedish_Sign_Language": "Swedish Sign Language",
+    "American Sign Language": "American Sign Language",  # canonical (no-op)
+    "Swiss German Sign Language": "Swiss German Sign Language",  # canonical
+    "Kazakh-Russian Sign Language": "Kazakh-Russian Sign Language",
 
     # =========================================================================
     # Reunionese Creole variants
@@ -460,12 +549,12 @@ NORMALIZE_MAP = {
     "Reunion Creole": "Reunionese Creole",
 
     # =========================================================================
-    # Greenlandic / Kalaallisut (same language)
+    # Greenlandic / Kalaallisut
     # =========================================================================
     "Kalaallisut": "Greenlandic",
 
     # =========================================================================
-    # Komi-Zyrian variants (space → hyphen canonical form)
+    # Komi-Zyrian variants
     # =========================================================================
     "Komi Zyrian": "Komi-Zyrian",
 
@@ -480,11 +569,6 @@ NORMALIZE_MAP = {
     "Rundi": "Kirundi",
 
     # =========================================================================
-    # Old Church Slavonic (underscore variant)
-    # =========================================================================
-    "Old_Church_Slavonic": "Old Church Slavonic",
-
-    # =========================================================================
     # Latin treebank-suffixed variants → Latin
     # =========================================================================
     "Latin PROIEL": "Latin",
@@ -493,6 +577,20 @@ NORMALIZE_MAP = {
     # African American English
     # =========================================================================
     "African American Vernacular English": "African American English",
+
+    # =========================================================================
+    # Tagalog / Filipino — keep BOTH separate (sociolinguistically distinct
+    # in many datasets) — no mapping.
+
+    # =========================================================================
+    # Hawaiian Pidgin (a creole, keep distinct from Hawaiian)
+    # =========================================================================
+    # No mapping needed — already distinct.
+
+    # =========================================================================
+    # Min variants — keep separate (each has its own ISO 639-3 code)
+    # =========================================================================
+    # Min Nan = nan, Min Dong = cdo  → no normalization
 
     # =========================================================================
     # Other ISO codes
@@ -509,6 +607,11 @@ NORMALIZE_MAP = {
     "ukr": "Ukrainian",
     "vmw": "Makhuwa",
     "yor": "Yoruba",
+    "amh": "Amharic",
+    "tir": "Tigrinya",
+    "som": "Somali",
+    "orm": "Oromo",
+    "ibo": "Igbo",
 }
 
 # =============================================================================
@@ -533,17 +636,21 @@ EXCLUDE_SET = {
     "Arabic Script", "Baybayin", "Lontara", "Thaana", "Takri",
     "Prachalit", "Sylheti Nagri",
 
-    # ---- Language families ----
+    # ---- Language families / groupings (not individual languages) ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
-    "Afro-Asiatic", "Austronesian", "Niger-Congo", "Dravidian",
-    "Turkic", "Uralic", "Malayo-Polynesian", "Hokan",
+    "Afro-Asiatic", "Afrasian", "Austronesian", "Niger-Congo",
+    "Dravidian", "Turkic", "Uralic", "Malayo-Polynesian", "Hokan",
     "Mixe-Zoque", "Pama-Nyungan", "Trans-New Guinea",
     "Araucanian", "Oto-Manguean", "Mande",
-    "Nilo-Saharan", "Edoid",
+    "Nilo-Saharan", "Edoid", "Kadai", "Mayan",
     "Romance languages", "Polynesian languages",
-    "Slavic", "South-Slavic languages",
+    "Slavic", "South-Slavic languages", "Celtic", "Iranian",
     "Kanak languages", "Kru languages",
     "Oceanic", "Gur", "Cahuapanan", "Totonacan",
+    "Micronesian", "Kartvelian",
+    "ObUgrian", "Franconian",
+    "Bai dialects", "Chinese dialects",
+    "Central Asian dialects",
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -552,16 +659,22 @@ EXCLUDE_SET = {
     # ---- Modalities (not languages) ----
     "Audio", "Video", "Acoustic", "Visual",
 
-    # ---- Nationalities / regions / countries (not languages) ----
-    "British", "East Asian", "Indian",
+    # ---- Domains / topics (not languages) ----
+    "Medical", "Music", "Twitter",
+
+    # ---- Nationalities / regions / countries that aren't languages ----
+    "East Asian", "Indian",
     "Singaporean", "Philippine", "Pakistani",
     "Colombian", "Malaysian",
     "Papua New Guinea", "Goroka",
+    "Burkinabe",  # nationality, not a language
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
     "Other Languages", "Other",
     "Unassigned", "Artificial",
+    "Mixed Language", "non-English",
+    "Khalisi",  # fictional (Game of Thrones)
 
     # ---- Language pairs (not individual languages) ----
     "English-Macedonian", "English-Albanian",
@@ -610,11 +723,35 @@ KNOWN_NON_PAIRS = {
     "seychellois creole", "louisiana creole",
     "early new high german", "old church slavonic",
     "central bikol",
+    "old-church-slavonic", "old_church_slavonic",
+    "swedish_sign_language", "upper_sorbian", "north_sami",
+    "middle-high-german",
+    "kwak'wala",  # apostrophe-bearing, not a pair
+    "mi'kmaq", "n'ko",
+    "chin ngwan", "muak sa-aak",
+    "swiss german", "min nan", "min bei",
+    "coeur d'alene",
 }
 
 
 # =============================================================================
-# 5. Core cleanup logic
+# 5. Helpers: ALL-CAPS detection
+# =============================================================================
+
+def _is_all_caps_phrase(s):
+    """
+    Return True if the string is in ALL CAPS (multiple words allowed) and
+    contains at least one letter. Used as a heuristic to flag for casing
+    normalization when no explicit mapping exists.
+    """
+    letters = [c for c in s if c.isalpha()]
+    if not letters:
+        return False
+    return all(c.isupper() for c in letters)
+
+
+# =============================================================================
+# 6. Core cleanup logic
 # =============================================================================
 
 def is_language_pair(lang):
@@ -667,6 +804,11 @@ def clean_language(lang):
             return NORMALIZE_MAP_CI[lang_lower]
         else:
             return None  # Unresolved ISO code
+
+    # Fallback: if the entry is ALL CAPS and not in the map, title-case it.
+    # This catches stragglers like a future "LOKAA" we forgot to map.
+    if _is_all_caps_phrase(lang) and len(lang) > 1:
+        return lang.title()
 
     return lang
 
@@ -730,17 +872,12 @@ def clean_record(record):
 
 
 # =============================================================================
-# 6. File I/O
+# 7. File I/O
 # =============================================================================
 
 def load_json_files(directory, recursive=True):
     """
     Load all JSON files from a directory, returning (filepath, data) pairs.
-
-    When recursive=True (default), walks subdirectories too.
-    Filepaths are returned as Path objects so that callers can compute
-    a relative path against `directory` and preserve subdirectory
-    structure when writing output.
     """
     results = []
     base = Path(directory)
@@ -770,7 +907,7 @@ def save_json(filepath, data):
 
 
 # =============================================================================
-# 7. Reporting
+# 8. Reporting
 # =============================================================================
 
 def print_change_log(all_changes):
@@ -860,7 +997,7 @@ def export_csv(counter, output_path, field_name="item"):
 
 
 # =============================================================================
-# 8. Main
+# 9. Main
 # =============================================================================
 
 def main():
@@ -977,7 +1114,6 @@ Examples:
 
             if not args.dry_run:
                 if args.outdir:
-                    # Preserve subdirectory structure under --outdir
                     rel = filepath.relative_to(base)
                     outpath = Path(args.outdir) / rel
                 else:
