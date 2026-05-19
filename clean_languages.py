@@ -590,6 +590,59 @@ NORMALIZE_MAP = {
     "Algerian": "Arabic",                  # nationality label = Algerian Arabic
     "Algerian Arabic": "Arabic",
 
+    # =========================================================================
+    # Year-5 additions: typos, diacritic merges, native names, synonyms
+    # =========================================================================
+    # Apostrophe fixes
+    "Mikmaq": "Mi'kmaq",
+    "Tsuet'ina": "Tsuut'ina",
+    # Hindi-belt typos
+    "Garwali": "Garhwali",
+    "Chattisgarhi": "Chhattisgarhi",
+    "Brajbhasha": "Braj Bhasha",
+    # Diacritic strips for indigenous-language names (consistent with
+    # existing canonical forms: Nahuatl, Guarani, Ashaninka)
+    "Náhuatl": "Nahuatl",
+    "Mundurukú": "Munduruku",
+    "Rarámuri": "Raramuri",
+    "Simba Guaraní": "Simba Guarani",
+    "Mbya Guaraní": "Mbya Guarani",
+    # Ghomala variants
+    "Ghomdá": "Ghomala",
+    # Sami / Saami consistency
+    "Saami South": "South Sami",
+    "Skolt": "Skolt Sami",        # bare term → canonical
+    # Native names → English canonical
+    "nêhiyawêwin": "Plains Cree",
+    "Morisien": "Mauritian Creole",
+    "Gwadeloupéyen": "Guadeloupean Creole",
+    "Bahasa Melayu": "Malay",
+    # Synonyms / merger normalizations
+    "Achinese": "Acehnese",
+    "Banjar": "Banjarese",
+    "Faroe": "Faroese",
+    "Wixarica": "Wixarika",
+    "Western Frisian": "Frisian",
+    "Shipibo": "Shipibo-Konibo",
+    "Gunwinggu": "Kunwinjku",
+    "Kunwok": "Kunwinjku",
+    "Inuptiaq": "Inupiaq",
+    "Inupiatum": "Inupiaq",
+    # Strip script annotation
+    "Chinese Simplified": "Chinese",
+    # User-decided ambiguities
+    "Gaelic": "Scottish Gaelic",
+    "Yucatec Maya": "Yucatec",
+    "Akan/Twi": "Akan",
+    "Inuktut": "Inuktitut",
+    "Old Awadhi": "Awadhi",
+    # Chewa; Nyanja → both are nya, same as Chichewa
+    "Chewa; Nyanja": "Chichewa",
+    # Visayan family resolution (per existing Bisaya → Cebuano rule)
+    "Visayan": "Cebuano",
+    # Runyankole / Runyankore spelling variant
+    "Runyankole": "Runyankore",
+
     # Crimean Turkish → Crimean Tatar (user decision: merge)
     "Crimean Turkish": "Crimean Tatar",
 
@@ -758,6 +811,8 @@ EXCLUDE_SET = {
     "Bantu",
     "Austronesian languages", "Uralic languages",
     "Baltic",  # language family / branch
+    "Papuan languages",  # umbrella geographic grouping
+    "Austroasiatic",     # family
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -775,6 +830,9 @@ EXCLUDE_SET = {
     # ---- Domains / topics (not languages) ----
     "Medical", "Music", "Twitter",
     "Medical Domain",
+    "Biology", "Electronics", "Law",
+    "Gis",          # GIS = Geographic Information Systems
+    "CodeReview",   # Stack Exchange site / dataset tag
 
     # ---- Nationalities / regions / countries that aren't languages ----
     "East Asian", "Indian",
@@ -782,6 +840,10 @@ EXCLUDE_SET = {
     "Colombian", "Malaysian",
     "Papua New Guinea", "Goroka",
     "Burkinabe",  # nationality, not a language
+    "Argentinian",  # nationality
+    "Arnhem",       # place (Arnhem Land, Australia)
+    "Yaounde",      # place (capital of Cameroon)
+    "Waigani",      # place in Papua New Guinea
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
@@ -803,6 +865,20 @@ EXCLUDE_SET = {
     # ---- Code-mixed varieties (no own ISO 639-3 code) ----
     "Singlish", "Hinglish",
     "Code-mixed English-Hindi",
+    "Bahasa Rojak",  # Malaysian English-Malay-Chinese-Tamil code-mixed
+
+    # ---- Sign-language abbreviations (per sign-language exclusion policy) ----
+    # The substring rule catches "X Sign Language" / "X Auslan" entries; these
+    # bare abbreviations need explicit listing.
+    "Bsl",  # British Sign Language
+    "Lse",  # Lengua de Signos Española (Spanish Sign Language)
+
+    # ---- Umbrella / non-specific labels ----
+    "Philippine language",
+    "Visayan languages",  # umbrella; "Visayan" → Cebuano via NORMALIZE_MAP
+
+    # ---- Likely data-entry errors (no recognised language) ----
+    "Dalkalaen", "Nahsta", "Bisakol", "Pani",
 
     # ---- Regional speech varieties without their own ISO 639-3 code ----
     # (Korean and Chinese sub-varieties: keep ones with ISO codes like
@@ -836,6 +912,7 @@ EXCLUDE_SET = {
 # =============================================================================
 EXCLUDE_SUBSTRINGS = (
     "sign language",   # excludes all sign languages (per user policy)
+    "auslan",          # Australian Sign Language (variant abbreviation)
 )
 
 # =============================================================================
