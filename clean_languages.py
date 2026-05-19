@@ -205,6 +205,8 @@ NORMALIZE_MAP = {
     "Sesotho sa Leboa": "Northern Sotho",
     "Sesotho sa Lebowa": "Northern Sotho",
     "Sepedi": "Northern Sotho",
+    "N. Sotho": "Northern Sotho",
+    "S. Sotho": "Sesotho",
 
     # =========================================================================
     # Other South African Bantu-prefix collapses
@@ -401,18 +403,22 @@ NORMALIZE_MAP = {
 
     # =========================================================================
     # Sami variants — collapse ALL to "Northern Sami" except dialects with
-    # their own ISO codes (Skolt Sami, Pite Saami → kept; standardise casing)
-    # NOTE: Generic "Sami"/"Saami"/"North Sami"/"North_Sami" → Northern Sami
+    # their own ISO codes (Skolt Sami, Pite Sami, Kildin Saami → kept;
+    # standardise casing)
+    # NOTE: Generic "Sami"/"Saami"/"North Sami"/"North Saami"/"North_Sami"
+    #       → Northern Sami
     # =========================================================================
     "Sámi": "Northern Sami",
     "Sami": "Northern Sami",
     "Saami": "Northern Sami",
     "North Sami": "Northern Sami",
+    "North Saami": "Northern Sami",
     "North Sámi": "Northern Sami",
     "North_Sami": "Northern Sami",
     "Northern Sámi": "Northern Sami",
     "Northern Saami": "Northern Sami",
     "Pite Saami": "Pite Sami",
+    "Kildin Saami": "Kildin Sami",
     # Skolt Sami stays as-is (distinct ISO code: sms)
 
     # =========================================================================
@@ -519,6 +525,22 @@ NORMALIZE_MAP = {
     # Tigrinya variants
     # =========================================================================
     "Tigrigna": "Tigrinya",
+
+    # =========================================================================
+    # Irish variants (Irish Gaelic is the same language as Irish, ISO: gle)
+    # =========================================================================
+    "Irish Gaelic": "Irish",
+
+    # =========================================================================
+    # Scottish — ambiguous bare term, resolved to Scottish Gaelic per
+    # user instruction (ISO: gla)
+    # =========================================================================
+    "Scottish": "Scottish Gaelic",
+
+    # =========================================================================
+    # Ethiopic — interpreted as Ge'ez the language (ISO: gez), NOT the script
+    # =========================================================================
+    "Ethiopic": "Ge'ez",
 
     # =========================================================================
     # Serbo-Croatian (merge into Serbian)
@@ -628,13 +650,24 @@ PROGRAMMING_LANGUAGES = {
 }
 
 # =============================================================================
-# 3. EXCLUDE LIST: Non-languages to remove
+# 3a. SPLIT MAP: entries that should be expanded into multiple languages.
+# These are data-entry artifacts where two languages got concatenated.
+# Order in the value list determines insertion order.
+# =============================================================================
+SPLIT_MAP = {
+    "Indonesian Hebrew": ["Indonesian", "Hebrew"],
+}
+
+SPLIT_MAP_CI = {k.lower(): v for k, v in SPLIT_MAP.items()}
+
+# =============================================================================
+# 4. EXCLUDE LIST: Non-languages to remove
 # =============================================================================
 EXCLUDE_SET = {
     # ---- Writing systems / scripts ----
     "Cyrillic", "CJK", "Latin script", "Latin", "Devanagari",
     "Arabic Script", "Baybayin", "Lontara", "Thaana", "Takri",
-    "Prachalit", "Sylheti Nagri",
+    "Prachalit", "Sylheti Nagri", "Linear B",
 
     # ---- Language families / groupings (not individual languages) ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -651,6 +684,8 @@ EXCLUDE_SET = {
     "ObUgrian", "Franconian",
     "Bai dialects", "Chinese dialects",
     "Central Asian dialects",
+    "Bantu",
+    "Austronesian languages", "Uralic languages",
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -692,7 +727,7 @@ EXCLUDE_SET = {
 }
 
 # =============================================================================
-# 4. Case-insensitive lookup helpers
+# 5. Case-insensitive lookup helpers
 # =============================================================================
 
 def _build_case_insensitive_map(mapping):
@@ -735,7 +770,7 @@ KNOWN_NON_PAIRS = {
 
 
 # =============================================================================
-# 5. Helpers: ALL-CAPS detection
+# 6. Helpers: ALL-CAPS detection
 # =============================================================================
 
 def _is_all_caps_phrase(s):
@@ -751,7 +786,7 @@ def _is_all_caps_phrase(s):
 
 
 # =============================================================================
-# 6. Core cleanup logic
+# 7. Core cleanup logic
 # =============================================================================
 
 def is_language_pair(lang):
@@ -817,18 +852,34 @@ def clean_languages(languages):
     """
     Clean a list of languages.
     Returns deduplicated list of cleaned language names and removed items.
+
+    Some inputs (defined in SPLIT_MAP) expand into multiple languages —
+    e.g. the data-entry artifact "Indonesian Hebrew" becomes
+    ["Indonesian", "Hebrew"]. This expansion happens up-front, before
+    per-item normalization, so each split-out language then runs through
+    clean_language() normally.
     """
+    # 1. First pass: expand split-cases.
+    expanded = []
+    for lang in languages:
+        key = lang.strip().lower()
+        if key in SPLIT_MAP_CI:
+            expanded.extend(SPLIT_MAP_CI[key])
+        else:
+            expanded.append(lang)
+
+    # 2. Second pass: clean each language individually.
     cleaned = []
     removed = []
 
-    for lang in languages:
+    for lang in expanded:
         result = clean_language(lang)
         if result is not None:
             cleaned.append(result)
         else:
             removed.append(lang)
 
-    # Deduplicate while preserving order
+    # 3. Deduplicate while preserving order.
     seen = set()
     deduped = []
     for lang in cleaned:
@@ -852,9 +903,21 @@ def clean_record(record):
 
     changes = None
     if cleaned != original:
-        # Build normalized pairs for reporting
+        # Build normalized pairs for reporting.
         normalized = []
         for lang in original:
+            key = lang.strip().lower()
+            if key in SPLIT_MAP_CI:
+                # Splits expand to multiple languages — report each separately
+                # (each item in the split list is also run through clean_language
+                # in case it needs further normalization, e.g. "Hebrew" → "Hebrew").
+                split_targets = [
+                    clean_language(x) or x for x in SPLIT_MAP_CI[key]
+                ]
+                normalized.append(
+                    f"{lang} → {', '.join(split_targets)} (split)"
+                )
+                continue
             result = clean_language(lang)
             if result is not None and result != lang:
                 normalized.append(f"{lang} → {result}")
@@ -872,7 +935,7 @@ def clean_record(record):
 
 
 # =============================================================================
-# 7. File I/O
+# 8. File I/O
 # =============================================================================
 
 def load_json_files(directory, recursive=True):
@@ -907,7 +970,7 @@ def save_json(filepath, data):
 
 
 # =============================================================================
-# 8. Reporting
+# 9. Reporting
 # =============================================================================
 
 def print_change_log(all_changes):
@@ -997,7 +1060,7 @@ def export_csv(counter, output_path, field_name="item"):
 
 
 # =============================================================================
-# 9. Main
+# 10. Main
 # =============================================================================
 
 def main():
