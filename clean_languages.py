@@ -692,6 +692,141 @@ NORMALIZE_MAP = {
     # Livvi Karelian = Livvi (same language, ISO olo)
     "Livvi Karelian": "Livvi",
 
+    # =========================================================================
+    # Year-7 additions
+    # =========================================================================
+    # ---- Typos ----
+    "Tajiki": "Tajik",
+    "Slovakian": "Slovak",
+    "Urd": "Urdu",
+    "Gitskan": "Gitksan",
+    "Banjarase": "Banjarese",
+    "Africans": "Afrikaans",
+    "N. Pidgin": "Nigerian Pidgin",
+    "Moore": "Mossi",          # the language: Mooré / Mòoré
+    "Komi Ziryan": "Komi-Zyrian",
+
+    # ---- Diacritic merges (consistent with existing strip-policy for
+    #      indigenous-language names where a no-diacritic canonical exists) ----
+    "Apurinã": "Apurina",
+    "Tupinambá": "Tupinamba",
+    "Yoloxóchitl Mixtec": "Yoloxochitl Mixtec",
+    # Note: Cabécar (cjp), Apinayé (apn), Wichí (mzh), Mündü (muh) all keep
+    # their diacritics — no no-diacritic variant has appeared in the data,
+    # so stripping serves no merge purpose.
+
+    # ---- Native names → English canonical ----
+    "Shqip": "Albanian",                       # Shqip = Albanian
+    "Afaan Oromoo": "Oromo",                   # native name
+    "Tarahumara": "Raramuri",                  # Spanish name → native canonical
+    "Kréyol": "Haitian Creole",                # generic Kréyol most often = Haitian
+    "Kréyòl Gwadeloupéyen": "Guadeloupean Creole",
+
+    # ---- Synonyms / merges ----
+    "Nyankore": "Runyankore",
+    "Bikolano": "Bikol",
+    "Halh": "Mongolian",
+    "Khalkha Mongolian": "Mongolian",
+    "Russia Buriat": "Buryat",
+    "North Macedonian": "Macedonian",          # country-adjective form
+    "Batak Toba": "Toba Batak",                # word-order swap
+    "Quiché": "K'iche'",
+    "k'iche'": "K'iche'",                      # lowercase casing fix
+    "Sereer": "Seereer",                       # spelling unification
+    # Bare Chinese province names (Sichuan, Yunnan, Hubei, Henan) are
+    # excluded as ambiguous regional labels — see EXCLUDE_SET below.
+    "Chol": "Ch'ol",                           # add apostrophe (= ctu)
+    "Yucatec Mayan": "Yucatec",                # synonym
+    "Yukatek Maya": "Yucatec",                 # synonym
+    "Apurina": "Apurina",                      # canonical (no-op, listed for clarity)
+
+    # ---- Hindi-belt regional varieties without ISO 639-3 codes ----
+    # (Bundeli, Kannauji, Khadi Boli, Malwi, Bhadavari, Himachali, Pichwara,
+    #  Pahari, Bhotiya, etc. — kept as-is when they have ISO codes; below
+    #  variants that don't are normalized.)
+
+    # ---- Strip script/diacritic annotations from regional-variant labels ----
+    "Hebrew, Unvocalized": "Hebrew",
+    "Arabic, Egyptian": "Arabic",
+    "Hñähñu": "Otomi",                         # Hñähñu is native name for Otomi
+    "Hñähñu/Otomí": "Otomi",
+    "Otomí": "Otomi",
+
+    # ---- Guaraní varieties (with diacritics) — collapse to no-diacritic
+    #      varieties where existing canonical exists. Distinct ISO codes are
+    #      preserved as separate languages. ----
+    "Guarani Mbya": "Mbya Guarani",            # word-order normalization
+    "Guaraní Mbya": "Mbya Guarani",
+    "Guaraní Paraguayan": "Paraguayan Guarani",
+    "Guaraní Eastern Bolivian": "Eastern Bolivian Guarani",
+    "Guaraní Western Bolivian": "Western Bolivian Guarani",
+    "Paraguayan Guarani": "Paraguayan Guarani",  # canonical
+
+    # ---- Compound semicolon/comma/slash labels → canonical single language ----
+    # (Per user decision: collapse split-style labels.)
+    "Dutch; Flemish": "Dutch",
+    "Pushto; Pashto": "Pashto",
+    "Romanian; Moldavian; Moldovan": "Romanian",
+    "Moldovan": "Romanian",
+    "Naija/Nigerian Pidgin": "Nigerian Pidgin",
+    "Aranese/Occitan": "Occitan",
+    # ↑ Aranese was previously kept distinct, but the compound label asks to
+    # collapse. Aranese alone is preserved (it has data of its own).
+
+    # ---- Parenthetical-variety labels (collapse to parent) ----
+    "Greenlandic (South)": "Greenlandic",
+    "Romani (Lovari)": "Romani",
+    "Tat (Muslim)": "Tat",
+    "Shehri (Jibbali)": "Shehri",
+    "Yukaghir (Kolyma)": "Kolyma Yukaghir",    # Kolyma Yukaghir has own ISO yux
+    "Meitei (Manipuri)": "Manipuri",           # Meitei = Manipuri
+
+    # ---- Eastern Armenian → Armenian (existing rule already covers
+    #      Western Armenian; do same for Eastern) ----
+    "Eastern Armenian": "Armenian",
+
+    # ---- Year-7 Arabic dialect collapses (existing Arabic dialect policy) ----
+    "Algerian Dialect": "Arabic",
+    "North Levantine Arabic": "Arabic",
+
+    # ---- Kurdish variety collapses (existing Kurdish-collapse policy) ----
+    "Central Kurdish": "Kurdish",
+    "Northern Kurdish": "Kurdish",
+
+    # ---- Quechua variety collapses where no separate ISO code ----
+    # Eastern Apurimac Quechua has ISO qve — kept distinct; leave unchanged
+    # Central Aymara has ISO ayc — kept distinct; leave unchanged
+    # Western Sierra Puebla Nahuatl — distinct Nahuatl variety, has own ISO
+
+    # ---- Yazva (= Yazva Komi, a dialect of Komi-Permyak) ----
+    "Yazva": "Komi-Permyak",
+
+    # ---- Earlier Egyptian = Ancient Egyptian variety ----
+    "Earlier Egyptian": "Ancient Egyptian",
+    "Egyptian": "Arabic",      # bare "Egyptian" → Egyptian Arabic per Arabic policy
+    # Note: if you mean Ancient Egyptian, use the explicit form.
+
+    # ---- Classical & Late Latin → match existing "Classical and Late Latin" ----
+    "Classical & Late Latin": "Classical and Late Latin",
+
+    # ---- Sami diacritic strips (already covered for prior years; add bare
+    #      forms here too) ----
+    "Sámi": "Northern Sami",
+
+    # ---- Wu Chinese / Yue Chinese / Taiwanese Hakka / Taiwanese Hokkien
+    #      — keep separate since each has its own ISO 639-3 code (wuu / yue /
+    #      hak / nan). No mapping. ----
+
+    # ---- Classical Armenian → already in EXCLUDE? no — has ISO xcl,
+    #      same as Old Armenian. Map both to one canonical form. ----
+    "Classical Armenian": "Old Armenian",
+
+    # ---- Old High German has ISO goh — keep as-is. ----
+
+    # ---- Dagur (mongolic, dta), Bajau (multiple ISO codes), Naxi (nxq/nbf),
+    #      Hokkien (= Min Nan, but Hokkien has own ISO hbl?) — actually Hokkien
+    #      = Min Nan; both have separate widely-used labels. Keep both. ----
+
     # Crimean Turkish → Crimean Tatar (user decision: merge)
     "Crimean Turkish": "Crimean Tatar",
 
@@ -820,6 +955,10 @@ PROGRAMMING_LANGUAGES = {
     "Assembly", "Fortran", "COBOL", "Prolog", "Lisp", "Erlang",
     "Clojure", "F#", "OCaml", "Scheme", "Smalltalk", "VHDL",
     "Verilog", "PowerShell", "Awk", "Sed",
+    # Year-7 additions
+    "OfficeScript",     # Microsoft Office automation language
+    "Power Query M",    # Excel/Power BI formula language
+    "Excel formulas",   # spreadsheet formulas
 }
 
 # =============================================================================
@@ -844,6 +983,14 @@ EXCLUDE_SET = {
     "Hanja",              # Korean writing using Chinese characters
     "Ipa",                # International Phonetic Alphabet
     "Cretan Hieroglyphs", # writing system
+    "Cuneiform",          # writing system (used for many languages)
+    "Linear A",           # writing system (undeciphered)
+    "Brahmi",             # writing system
+    "Gurmukhi",           # writing system (used for Punjabi)
+    "Modi",               # writing system (used for Marathi)
+    "Ol Chiki",           # writing system (used for Santali)
+    "Hiragana",           # writing system (Japanese)
+    "Bopomofo",           # writing system (Mandarin phonetics)
 
     # ---- Language families / groupings (not individual languages) ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -873,6 +1020,11 @@ EXCLUDE_SET = {
     "Sami languages",    # ASCII variant of above
     "Sorbian",           # umbrella for Upper/Lower Sorbian, no own ISO code
     "Bihari",            # umbrella for Bhojpuri/Maithili/Magahi/Angika
+    "Karen",             # umbrella for many Karen languages
+    "Ryukyuan",          # family branch
+    "East Asian languages",  # geographic umbrella
+    "Asturleonese",      # umbrella for Asturian/Leonese/Mirandese
+    "Bahasa",            # umbrella (means "language" in Malay)
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -905,6 +1057,13 @@ EXCLUDE_SET = {
     "Yaounde",      # place (capital of Cameroon)
     "Waigani",      # place in Papua New Guinea
     "Mauritania",   # country, not language
+    # Year-7 nationality / region labels (no ISO code; per user policy:
+    # exclude entirely, even when an Arabic dialect is implied)
+    "Sudanese", "Bangladeshi", "Mexican",
+    "Afghan", "Canadian", "Ghanaian", "Nigerian",
+    "Tunisian", "Lebanese", "Qatari",
+    "Grenadian", "Puerto Rican",
+    "Ethiopian", "Eritrean", "Jewish",
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
@@ -941,13 +1100,29 @@ EXCLUDE_SET = {
     # ---- Likely data-entry errors (no recognised language) ----
     "Dalkalaen", "Nahsta", "Bisakol", "Pani",
     "Pichwara",     # unknown — likely data error
+    "Atezo", "Amr", "Hamta", "Iyara", "Bwasilaki", "Ganggalida",
+    # Bare Chinese province names (ambiguous; could mean Mandarin or
+    # any of the regional minority languages spoken there)
+    "Sichuan", "Yunnan", "Hubei", "Henan",
+    "Numma-guhooni",   # unknown
+    "Arya",            # unclear / data error
+    "Baharic",         # unknown / typo
 
     # ---- Religious-text / domain tags (not languages) ----
     "Koran",        # the Quran (religious text), not a language
     "Code",         # domain/programming-code tag
+    "Subtitles",        # not a language — corpus type
+    "Shakespearean",    # not a language — domain
+    "American Literature",  # domain
+    "Northeast Asian Archaeological Sites",  # domain
+    "Others",       # umbrella placeholder
 
     # ---- Too-generic / ambiguous umbrellas ----
     "Pidgin",                  # ambiguous (Nigerian Pidgin? Tok Pisin? ...)
+    "Creole",                  # ambiguous (which creole?)
+
+    # ---- Code-mixed labels ----
+    "CodeMixed",
 
     # ---- Code-mixed language-pair labels ----
     "Komi-Zyrian-Russian",     # code-mixed Komi-Zyrian/Russian content
