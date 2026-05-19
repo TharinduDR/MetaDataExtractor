@@ -643,6 +643,55 @@ NORMALIZE_MAP = {
     # Runyankole / Runyankore spelling variant
     "Runyankole": "Runyankore",
 
+    # =========================================================================
+    # Year-6 additions: typos, diacritic merges, native names, synonyms
+    # =========================================================================
+    # Typos
+    "Telegu": "Telugu",
+    "Irisht": "Irish",
+    "Najja": "Nigerian Pidgin",        # typo of Naija
+    "Tsilhq'ut'in": "Tsilhqot'in",     # typo (extra apostrophe)
+    "Vorú": "Võro",                    # typo
+    # Abbreviated forms → full names
+    "Imb. Quechua": "Imbabura Quechua",
+    "Zin. Tzotzil": "Zinacantán Tzotzil",
+    "Swiss G.": "Swiss German",
+    # Native names / synonyms
+    "Gagana": "Samoan",                # Gagana Sāmoa is the native name
+    "Bahasa Indonesia": "Indonesian",
+    "Persian Farsi": "Persian",        # redundant tautology
+    "Dari Persian": "Persian",         # = Persian variety (per Persian-collapse policy)
+    "Azeri Turkish": "Azerbaijani",
+    "Iranian Azerbaijani": "Azerbaijani",
+    "Sibe": "Xibe",                    # alt spelling (ISO sjo)
+    "Myanmar Written Language": "Burmese",
+    "Bokmål (Norwegian)": "Norwegian",
+    "Biblical Hebrew": "Hebrew",
+    "Assyrian": "Assyrian Neo-Aramaic",
+    # Arabic dialect collapse (existing policy)
+    "Sudanese Arabic": "Arabic",
+    "Darija": "Arabic",                # Moroccan Arabic colloquial name
+    "Moroccan Arabic/Darija": "Arabic",
+    # Mozambican Portuguese collapse (existing policy on regional Portuguese)
+    "Mozambican Portuguese": "Portuguese",
+    "Mozambique Portuguese": "Portuguese",
+    # Diacritic strips
+    "Èdò": "Edo",
+    "Ghomálá'": "Ghomala",
+    # Sami diacritic strips (consistency with existing Northern Sami etc.)
+    "Inari Sámi": "Inari Sami",
+    "Lule Sámi": "Lule Sami",
+    "South Sámi": "South Sami",
+    "Pite Sámi": "Pite Sami",
+    "Skolt Sámi": "Skolt Sami",
+    # Serbian script-annotation strip
+    "Serbian (Cyrillic)": "Serbian",
+    "Serbian (Latin)": "Serbian",
+    "Serbian Cyrillic": "Serbian",
+    "Serbian Latin": "Serbian",
+    # Livvi Karelian = Livvi (same language, ISO olo)
+    "Livvi Karelian": "Livvi",
+
     # Crimean Turkish → Crimean Tatar (user decision: merge)
     "Crimean Turkish": "Crimean Tatar",
 
@@ -792,6 +841,9 @@ EXCLUDE_SET = {
     "Cyrillic", "CJK", "Latin script", "Latin", "Devanagari",
     "Arabic Script", "Baybayin", "Lontara", "Thaana", "Takri",
     "Prachalit", "Sylheti Nagri", "Linear B",
+    "Hanja",              # Korean writing using Chinese characters
+    "Ipa",                # International Phonetic Alphabet
+    "Cretan Hieroglyphs", # writing system
 
     # ---- Language families / groupings (not individual languages) ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -813,6 +865,14 @@ EXCLUDE_SET = {
     "Baltic",  # language family / branch
     "Papuan languages",  # umbrella geographic grouping
     "Austroasiatic",     # family
+    "Indic languages",   # family
+    "Indic",             # family
+    "African languages", # umbrella geographic grouping
+    "Semitic languages", # family
+    "Sámi languages",    # umbrella for the Sami group
+    "Sami languages",    # ASCII variant of above
+    "Sorbian",           # umbrella for Upper/Lower Sorbian, no own ISO code
+    "Bihari",            # umbrella for Bhojpuri/Maithili/Magahi/Angika
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -844,6 +904,7 @@ EXCLUDE_SET = {
     "Arnhem",       # place (Arnhem Land, Australia)
     "Yaounde",      # place (capital of Cameroon)
     "Waigani",      # place in Papua New Guinea
+    "Mauritania",   # country, not language
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
@@ -879,6 +940,17 @@ EXCLUDE_SET = {
 
     # ---- Likely data-entry errors (no recognised language) ----
     "Dalkalaen", "Nahsta", "Bisakol", "Pani",
+    "Pichwara",     # unknown — likely data error
+
+    # ---- Religious-text / domain tags (not languages) ----
+    "Koran",        # the Quran (religious text), not a language
+    "Code",         # domain/programming-code tag
+
+    # ---- Too-generic / ambiguous umbrellas ----
+    "Pidgin",                  # ambiguous (Nigerian Pidgin? Tok Pisin? ...)
+
+    # ---- Code-mixed language-pair labels ----
+    "Komi-Zyrian-Russian",     # code-mixed Komi-Zyrian/Russian content
 
     # ---- Regional speech varieties without their own ISO 639-3 code ----
     # (Korean and Chinese sub-varieties: keep ones with ISO codes like
@@ -995,7 +1067,9 @@ EXCLUDE_CI = _build_case_insensitive_set(EXCLUDE_SET)
 
 # Known non-pairs: hyphenated names that are NOT language pairs
 KNOWN_NON_PAIRS = {
-    "komi-zyrian", "komi-ziran", "min dong", "shipibo-konibo",
+    "komi-zyrian", "komi-ziran", "komi-permyak",
+    "komi-zyrian-russian",  # mixed-language label, handled via EXCLUDE_SET below
+    "min dong", "shipibo-konibo",
     "serbo-croatian", "kazakh-russian sign language",
     "guinea kpelle", "kok borok", "hiri motu",
     "cook islands maori", "cook islands māori",
