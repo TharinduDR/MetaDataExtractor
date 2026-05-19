@@ -562,6 +562,48 @@ NORMALIZE_MAP = {
     "Chaldean": "Chaldean Neo-Aramaic",  # cld — the language, not the church
     "Dholuo": "Luo",               # Dholuo is the native name for Luo (luo)
 
+    # Spelling / diacritic variants and synonyms (added this round)
+    "Faroeese": "Faroese",                 # typo
+    "Kirghiz": "Kyrgyz",                   # spelling variant
+    "Divehi": "Dhivehi",                   # spelling variant
+    "Iloko": "Ilocano",                    # native name (Iloko = Ilocano)
+    "South Saami": "South Sami",           # Saami → Sami consistency
+    "Hakka Chinese": "Hakka",              # = Hakka
+    "Church Slavic": "Old Church Slavonic",  # synonym
+    "Nzébi": "Nzebi",                      # diacritic → bare form for merging
+    "Low-saxon": "Low Saxon",              # hyphen → space
+    "Waray-waray": "Waray",                # reduplicated native name
+    "Komi Permyak": "Komi-Permyak",        # consistency with Komi-Zyrian
+    # NOTE: bare "Mari" (without a regional qualifier) is ambiguous; per user
+    # decision, collapse to the most common variety "Meadow Mari". The
+    # specific entries "Eastern Mari", "Western Mari", "Hill Mari", and
+    # "Meadow Mari" are preserved as-is.
+    "Mari": "Meadow Mari",
+
+    # Hyphenated-lowercase variants (added this round)
+    "Norwegian-bokmål": "Norwegian",       # existing Norwegian-collapse policy
+    "Norwegian-nynorsk": "Norwegian",
+    "South-azerbaijani": "Azerbaijani",    # existing Azerbaijani-collapse policy
+    "Western-punjabi": "Western Panjabi",  # hyphen → space (keep distinct from Punjabi: ISO pnb)
+
+    # Algerian Arabic → Arabic (per existing Arabic dialect policy)
+    "Algerian": "Arabic",                  # nationality label = Algerian Arabic
+    "Algerian Arabic": "Arabic",
+
+    # Crimean Turkish → Crimean Tatar (user decision: merge)
+    "Crimean Turkish": "Crimean Tatar",
+
+    # Russian (Latin), Chinese (Latin) — strip script annotation
+    "Russian (Latin)": "Russian",
+    "Chinese (Latin)": "Chinese",
+
+    # Cypriot Greek → Greek (regional variety, no separate ISO code at 639-3)
+    "Cypriot Greek": "Greek",
+
+    # Bisaya → Cebuano (Bisaya is the umbrella native term; in practice
+    # most NLP corpora labelled "Bisaya" refer to Cebuano)
+    "Bisaya": "Cebuano",
+
     # ALL camelcase variants (run-together words) → spaced canonical form
     "WelshRomani": "Welsh Romani",
     "VlaxRomani": "Vlax Romani",
@@ -715,17 +757,24 @@ EXCLUDE_SET = {
     "Central Asian dialects",
     "Bantu",
     "Austronesian languages", "Uralic languages",
+    "Baltic",  # language family / branch
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
     "Syntagrus", "German PUD",
     "MiiPro",  # MiiPro is the name of a Japanese child-language corpus
+    "Tanzil",  # Quran translation corpus
+    "Ted",     # TED talks corpus
+    "Qed",     # QED corpus (educational subtitles)
+    "Arasaac", # ARASAAC pictogram set (AAC symbols, not a language)
+    "Nanomuito",  # unknown — appears to be a data artifact
 
     # ---- Modalities (not languages) ----
     "Audio", "Video", "Acoustic", "Visual",
 
     # ---- Domains / topics (not languages) ----
     "Medical", "Music", "Twitter",
+    "Medical Domain",
 
     # ---- Nationalities / regions / countries that aren't languages ----
     "East Asian", "Indian",
