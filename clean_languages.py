@@ -91,7 +91,9 @@ NORMALIZE_MAP = {
     "Canadian French": "French",
     "Hexagonal French": "French",
     "French (Quebec)": "French",
-    "Middle French": "French",
+    # NOTE: "Middle French" → French has been REMOVED. Middle French (frm)
+    # is a distinct historical language with its own ISO 639-3 code and is
+    # preserved via REGIONAL_HISTORICAL_KEEPERS.
     "fr": "French",
     "fre": "French",
 
@@ -536,11 +538,40 @@ NORMALIZE_MAP = {
     # user instruction (ISO: gla)
     # =========================================================================
     "Scottish": "Scottish Gaelic",
+    "Scots Gaelic": "Scottish Gaelic",
 
     # =========================================================================
     # Ethiopic — interpreted as Ge'ez the language (ISO: gez), NOT the script
     # =========================================================================
     "Ethiopic": "Ge'ez",
+
+    # =========================================================================
+    # Additional typos / diacritic variants / native-name synonyms
+    # =========================================================================
+    "Pastho": "Pashto",            # typo
+    "Toki Pisin": "Tok Pisin",     # typo
+    "Columbian Spanish": "Spanish",  # typo + regional collapse to parent
+    "Guaraní": "Guarani",          # diacritic
+    "Euskara": "Basque",           # native name
+    "Bhutanese": "Dzongkha",       # nationality → language
+    "Nepalese": "Nepali",          # nationality → language
+    "Lezgi": "Lezgian",            # spelling variant
+    "Myanmar (Burmese)": "Burmese",  # parenthetical clarification
+    "Syriac": "Classical Syriac",  # most NLP corpora mean syc, not syr
+    "Central Khmer": "Khmer",      # = Khmer macrolanguage
+    "Chaldean": "Chaldean Neo-Aramaic",  # cld — the language, not the church
+    "Dholuo": "Luo",               # Dholuo is the native name for Luo (luo)
+
+    # ALL camelcase variants (run-together words) → spaced canonical form
+    "WelshRomani": "Welsh Romani",
+    "VlaxRomani": "Vlax Romani",
+    "WesternPanjabi": "Western Panjabi",     # has own ISO code pnb, keep distinct
+    "SoutheastPashayi": "Southeast Pashayi",
+    "NortheastPashayi": "Northeast Pashayi",
+    "NorthwestPashayi": "Northwest Pashayi",
+    "MahasuPahari": "Mahasu Pahari",
+    # NOTE: "MiiPro" is a corpus tag (the MiiPro Japanese child-language
+    # corpus), not a language — handled in EXCLUDE_SET below.
 
     # =========================================================================
     # Serbo-Croatian (merge into Serbian)
@@ -556,13 +587,11 @@ NORMALIZE_MAP = {
     # "Montenegrin": "Serbian",
 
     # =========================================================================
-    # Sign language normalization
+    # Sign languages — EXCLUDED per user policy. See EXCLUDE_SET below.
+    # Previous entries removed: "Sign Language", "Swedish_Sign_Language",
+    # "American Sign Language", "Swiss German Sign Language",
+    # "Kazakh-Russian Sign Language".
     # =========================================================================
-    "Sign Language": "Sign Language (unspecified)",
-    "Swedish_Sign_Language": "Swedish Sign Language",
-    "American Sign Language": "American Sign Language",  # canonical (no-op)
-    "Swiss German Sign Language": "Swiss German Sign Language",  # canonical
-    "Kazakh-Russian Sign Language": "Kazakh-Russian Sign Language",
 
     # =========================================================================
     # Reunionese Creole variants
@@ -690,6 +719,7 @@ EXCLUDE_SET = {
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
     "Syntagrus", "German PUD",
+    "MiiPro",  # MiiPro is the name of a Japanese child-language corpus
 
     # ---- Modalities (not languages) ----
     "Audio", "Video", "Acoustic", "Visual",
@@ -710,6 +740,27 @@ EXCLUDE_SET = {
     "Unassigned", "Artificial",
     "Mixed Language", "non-English",
     "Khalisi",  # fictional (Game of Thrones)
+    "Khalish",  # appears to be a typo/variant of "Khalisi" — fictional
+    "Ice",      # not a language
+    "Jaquar",   # typo / not a recognised language
+    "Miwoc",    # typo (likely Miwok); excluded rather than guessed
+    "Mathematics",  # not a language
+    "Mongolia",     # country, not language
+    # Scripts (additions for this round)
+    "Glagolitic", "Katakana",
+    # Language families / groupings (additions)
+    "Romance", "Slavic languages",
+
+    # ---- Code-mixed varieties (no own ISO 639-3 code) ----
+    "Singlish", "Hinglish",
+    "Code-mixed English-Hindi",
+
+    # ---- Regional speech varieties without their own ISO 639-3 code ----
+    # (Korean and Chinese sub-varieties: keep ones with ISO codes like
+    #  Cantonese/Min Nan/Hakka/Jejueo elsewhere; exclude bare political/
+    #  regional labels.)
+    "North Korean", "South Korean",
+    "Taiwanese",   # ambiguous regional label (Mandarin in Taiwan vs Min Nan)
 
     # ---- Language pairs (not individual languages) ----
     "English-Macedonian", "English-Albanian",
@@ -724,6 +775,75 @@ EXCLUDE_SET = {
     "German-English", "Chinese-English",
     "Arabic-English", "Hindi-English",
     "Japanese-English", "Korean-English",
+}
+
+# =============================================================================
+# 4a. EXCLUDE BY SUBSTRING: catches open-ended categories without needing to
+# enumerate every variant. Applied case-insensitively.
+#
+# IMPORTANT: keep these substrings narrow enough that they don't match
+# legitimate languages. E.g. "sign language" is safe because no spoken
+# language has that phrase in its name.
+# =============================================================================
+EXCLUDE_SUBSTRINGS = (
+    "sign language",   # excludes all sign languages (per user policy)
+)
+
+# =============================================================================
+# 4b. REGIONAL VARIETY → PARENT LANGUAGE
+# Pragmatic rule (per user): regional varieties without their own ISO 639-3
+# code collapse to the parent (e.g. "Chilean Spanish" → "Spanish").
+# Historical languages (Old English, Middle English, Old French, etc.) DO
+# have ISO codes and are explicitly preserved.
+# =============================================================================
+REGIONAL_HISTORICAL_KEEPERS = {
+    # These look like "<Adjective> <Language>" but are distinct historical
+    # languages with ISO 639-3 codes — must be kept, not collapsed.
+    "old english",          # ang
+    "middle english",       # enm
+    "early modern english",
+    "old french",           # fro
+    "middle french",        # frm
+    "old high german",
+    "middle high german",   # gmh
+    "middle low german",    # gml
+    "old saxon",            # osx
+    "old church slavonic",  # chu
+    "ancient greek",        # grc
+    "old armenian",         # xcl
+    "old irish",            # sga
+    "old novgorodian",
+    "old prussian",         # prg
+    "old polish",
+    "old east slavic",      # orv
+    "old czech",
+    "old sorbian",
+    "old javanese",         # kaw
+    "old tibetan",          # otb
+    "classical tibetan",    # xct
+    "classical arabic",     # arb (Standard Arabic macrolang)
+    "classical syriac",     # syc
+    "vedic sanskrit",       # has own corpus tradition, kept distinct
+    # Other multi-word "<Modifier> <Language>" entries that ARE distinct
+    # languages with ISO codes:
+    "african american english",  # aae
+    "swiss german",              # gsw
+    "crimean tatar",             # crh
+    "molise croatian",           # svm
+    "old béarnais", "modern béarnais",
+    "old gascon", "modern gascon",
+    # Sign languages are handled by EXCLUDE_SUBSTRINGS, no need to list here.
+}
+
+REGIONAL_PARENT_PATTERNS = {
+    # parent language → tuple of substrings that, when matched
+    # (case-insensitively), collapse the entry to the parent.
+    # Entries in REGIONAL_HISTORICAL_KEEPERS bypass this.
+    "English":  ("english",),
+    "Spanish":  ("spanish",),
+    "French":   ("french",),
+    "Welsh":    ("welsh",),     # e.g. "Welsh (South Wales)" → Welsh
+    "Japanese": ("japanese",),  # e.g. "Japanese (Hiragana)" → Japanese
 }
 
 # =============================================================================
@@ -813,35 +933,62 @@ def clean_language(lang):
     """
     Clean a single language string.
     Returns the cleaned language name, or None if it should be excluded.
+
+    Order of checks:
+      1. Programming languages → exclude
+      2. EXCLUDE_SET exact match → exclude
+      3. EXCLUDE_SUBSTRINGS (e.g. "sign language") → exclude
+      4. Language pairs (e.g. "English-French") → exclude
+      5. NORMALIZE_MAP exact match → canonical form
+      6. Regional varieties (e.g. "Chilean Spanish") → parent language
+         (unless explicitly preserved as a historical/distinct language)
+      7. Short ISO-code fallback
+      8. ALL-CAPS fallback
     """
     lang = lang.strip()
     lang_lower = lang.lower()
 
-    # Exclude programming languages
+    # 1. Exclude programming languages
     if lang_lower in PROGRAMMING_CI:
         return None
 
-    # Exclude non-language entries
+    # 2. Exclude non-language entries (exact match)
     if lang_lower in EXCLUDE_CI:
         return None
 
-    # Exclude language pairs
+    # 3. Exclude by substring (catches all sign languages, etc.)
+    #    Normalize underscores → spaces so "Swedish_Sign_Language" also matches.
+    lang_lower_spaced = lang_lower.replace("_", " ")
+    for sub in EXCLUDE_SUBSTRINGS:
+        if sub in lang_lower_spaced:
+            return None
+
+    # 4. Exclude language pairs
     if is_language_pair(lang):
         return None
 
-    # Normalize known variants (case-insensitive)
+    # 5. Normalize known variants (case-insensitive)
     if lang_lower in NORMALIZE_MAP_CI:
         return NORMALIZE_MAP_CI[lang_lower]
 
-    # If it looks like a short ISO code (2-4 lowercase letters), try to resolve
+    # 6. Regional-variety collapse to parent language
+    #    (e.g. "Chilean Spanish" → "Spanish", "US English" → "English")
+    #    Skip if this is an explicitly-preserved historical/distinct language.
+    if lang_lower not in REGIONAL_HISTORICAL_KEEPERS:
+        for parent, substrings in REGIONAL_PARENT_PATTERNS.items():
+            if lang_lower == parent.lower():
+                break  # exact match — it IS the parent, return below
+            if any(sub in lang_lower for sub in substrings):
+                return parent
+
+    # 7. If it looks like a short ISO code (2-4 lowercase letters), try to resolve
     if len(lang) <= 4 and lang.isalpha() and lang == lang.lower():
         if lang_lower in NORMALIZE_MAP_CI:
             return NORMALIZE_MAP_CI[lang_lower]
         else:
             return None  # Unresolved ISO code
 
-    # Fallback: if the entry is ALL CAPS and not in the map, title-case it.
-    # This catches stragglers like a future "LOKAA" we forgot to map.
+    # 8. Fallback: if the entry is ALL CAPS and not in the map, title-case it.
     if _is_all_caps_phrase(lang) and len(lang) > 1:
         return lang.title()
 
