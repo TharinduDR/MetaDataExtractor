@@ -69,6 +69,7 @@ EXPLICIT_OVERRIDES = {
     # =======================================================================
     # BARE CODES WITHOUT LEADING ZERO (T1→T01, T2→T02, etc.)
     # =======================================================================
+    "T31":"",
     "T1": "T01",
     "T2": "T02",
     "T3": "T03",
@@ -755,6 +756,7 @@ Examples:
             if not args.dry_run:
                 if args.outdir:
                     # Preserve subdirectory structure under --outdir
+                    rel = filepath.relative_to(base)
                     rel = filepath.relative_to(base)
                     outpath = Path(args.outdir) / rel
                 else:
