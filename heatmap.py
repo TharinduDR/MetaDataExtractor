@@ -116,7 +116,12 @@ def main():
     ax.set_xlabel("Research area")
     ax.set_ylabel("")
     ax.tick_params(axis="x", rotation=90, labelsize=8)
-    ax.tick_params(axis="y", labelsize=5.5)
+
+    # Force every language to be labelled. seaborn/matplotlib auto-thin
+    # y-ticks when there are many rows; setting them explicitly overrides
+    # that behaviour. Centre the ticks at row centres (0.5, 1.5, ...).
+    ax.set_yticks(np.arange(len(matrix)) + 0.5)
+    ax.set_yticklabels(matrix.index, fontsize=5.5)
 
     legend_handles = [
         Patch(facecolor=CLASS_PALETTE[c], edgecolor="white",
