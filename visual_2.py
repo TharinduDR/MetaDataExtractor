@@ -174,8 +174,9 @@ def fig2_temporal_heatmap(df: pd.DataFrame, out_path: Path):
     pivot = pivot.sort_values("_total", ascending=False)
     pivot = pivot.drop(columns="_total")
 
-    # Flatten the multi-index for cleaner row labels
-    pivot.index = [f"{c} {s[:50]}" for c, s in pivot.index]
+
+    # Use only the area code for row labels (e.g. T01 instead of "T01 Bias...")
+    pivot.index = [c for c, _ in pivot.index]
 
     fig, ax = plt.subplots(figsize=(8.5, 0.32 * len(pivot) + 1.5))
 
