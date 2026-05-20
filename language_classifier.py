@@ -232,6 +232,10 @@ def main():
                              "consider (one per line). Used to identify "
                              "Left-Behinds. If omitted, the global language "
                              "set is derived from the input papers.")
+    parser.add_argument("--skip-left-behinds", action="store_true",
+                        help="Omit Class 0 (Left-Behinds) entries from the "
+                             "JSON and CSV outputs. Counts in the console "
+                             "summary table are not affected.")
     args = parser.parse_args()
 
     if not args.input_dir.is_dir():
@@ -260,8 +264,24 @@ def main():
             area_lang_counts[area], all_languages,
         )
 
-    write_json(args.output_json, area_records)
-    write_csv(args.output_csv, area_records)
+    # Build the version that gets written to disk. The summary table is
+    # printed from the unfiltered records so users always see the true
+    # Left-Behinds counts regardless of this flag.
+    if args.skip_left_behinds:
+        output_records = {
+            area: [r for r in records if r["class"] != 0]
+            for area, records in area_records.items()
+        }
+        skipped = sum(
+            len(area_records[a]) - len(output_records[a])
+            for a in area_records
+        )
+        print(f"Skipping {skipped} Left-Behinds entries from output files")
+    else:
+        output_records = area_records
+
+    write_json(args.output_json, output_records)
+    write_csv(args.output_csv, output_records)
     print_summary(area_records)
 
 
