@@ -247,7 +247,7 @@ Available research areas:
 * T12 Interpretability/explainability of language models and language and speech processing tools
 * T13 Knowledge discovery/representation (knowledge graphs, linked data, terminologies, lexicons, ontologies, etc.)
 * T14 Language Modeling (including training, fine-tuning, representation learning, and generation of synthetic data)
-* T15 Lexicon and Semantics
+* : Lexicon and Semantics
 * T16 Machine Translation (including Speech-to-Speech) and Translation Aids
 * T17 Multimodality, Cross-modality (including Sign Languages, Vision and Other Modalities), Multimodal Applications, Grounded Language Acquisition
 * T18 Text Summarization
