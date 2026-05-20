@@ -47,7 +47,7 @@ RE_NEW = re.compile(r"^(\d{4})\.")
 RE_OLD = re.compile(r"^[A-Za-z](\d{2})-")
 
 
-def parse_year(paper: dict) -> int | None:
+def parse_year(paper: dict) -> "int | None":
     """Return the 4-digit publication year for a paper, or None."""
     if "year" in paper and isinstance(paper["year"], int):
         return paper["year"]
