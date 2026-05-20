@@ -827,6 +827,126 @@ NORMALIZE_MAP = {
     #      Hokkien (= Min Nan, but Hokkien has own ISO hbl?) — actually Hokkien
     #      = Min Nan; both have separate widely-used labels. Keep both. ----
 
+    # =========================================================================
+    # Year-8 additions
+    # =========================================================================
+    # ---- Typos ----
+    "Azerbajani": "Azerbaijani",
+    "Santhali": "Santali",
+    "Finish": "Finnish",
+    "Asamese": "Assamese",
+    "EfiK": "Efik",                          # casing
+    "Lezghian": "Lezgian",
+    "Bhilli": "Bhili",
+    "Kiche": "K'iche'",
+    "Tsuum'ina": "Tsuut'ina",
+    "Arápa ho": "Arapaho",                   # data-error space split
+    "SeSotho": "Sesotho",                    # camelcase normalisation
+    "Senćofen": "Senćoten",                  # typo (f → t)
+
+    # ---- Diacritic merges ----
+    "Mapudungún": "Mapudungun",
+
+    # ---- Native names / synonyms → English canonical ----
+    "Afan Oromo": "Oromo",
+    "Quechuan": "Quechua",
+    "Jinghpaw": "Jingpho",
+    "Aceh": "Acehnese",
+    "Bali": "Balinese",
+    "Bhutani": "Dzongkha",
+    "Niue": "Niuean",
+    "Samoa": "Samoan",
+    "Tokelau": "Tokelauan",
+    "Sylhet": "Sylheti",
+    "Chittagong": "Chittagonian",
+    "Rromani": "Romani",
+    "te reo Māori": "Maori",
+    "Yup'ik": "Yupik",
+    "Ossetic": "Ossetian",
+    "Naija Pidgin": "Nigerian Pidgin",
+    "Modern Turkish": "Turkish",
+    "Tetum": "Tetun",
+    "Standard Arabic": "Arabic",
+    "Sāotomense": "São Tomense",
+    "Newari": "Newar",
+    "Church Slavonic": "Old Church Slavonic",
+    "Fulah": "Fula",
+
+    # ---- Bhutia/Sikkimese (= sip) ----
+    "Bhutia": "Sikkimese",
+
+    # ---- North/South Ndebele canonical names ----
+    "North Ndebele": "Northern Ndebele",
+    "South Ndebele": "Southern Ndebele",
+
+    # ---- Sichuan Yi → Yi ----
+    "Sichuan Yi": "Yi",
+
+    # ---- Twi variants (per user policy: all → Twi) ----
+    "Asante Twi": "Twi",
+    "Asante-twi": "Twi",
+    "Akuapim-twi": "Twi",
+
+    # ---- Bavarian German → Bavarian ----
+    "Bavarian German": "Bavarian",
+
+    # ---- Walliserdeutsch → Swiss German ----
+    "Walliserdeutsch": "Swiss German",
+
+    # ---- Kiribati / I-Kiribati / Gilbertese (all = gil) ----
+    "I-Kiribati": "Kiribati",
+    "Gilbertese": "Kiribati",
+
+    # ---- Seereer spelling unification ----
+    "Serer": "Seereer",
+
+    # ---- Caribbean/island nationality labels → French-based creoles ----
+    "Mauritian": "Mauritian Creole",
+    "Martinican": "Martinican Creole",
+    "Guadeloupean": "Guadeloupean Creole",
+    "Seychellois": "Seychellois Creole",
+    "Antillean": "Antillean Creole",
+    "Saint Lucian Patois": "Saint Lucian Creole",
+
+    # ---- Arabic dialect collapses (per existing Arabic policy) ----
+    "Arabic (Algerian)": "Arabic",
+    "Arabic (Moroccan)": "Arabic",
+    "Moroccan Darija": "Arabic",
+    "South Levantine Arabic": "Arabic",
+    "Najdi Arabic": "Arabic",
+    "Standard Moroccan Tamazight": "Tamazight",
+
+    # ---- Compound Chinese-variety labels ----
+    "Chinese (Min Nan)": "Min Nan",
+    "Mandarin (Taiwan)": "Chinese",
+    "Min Dong Chinese": "Min Dong",
+
+    # ---- Parenthetical-variety labels (collapse to parent) ----
+    "Tonga (Zambia)": "Tonga",
+    "Luo (Kenya and Tanzania)": "Luo",
+
+    # ---- camelCase concatenated labels → parent ----
+    "PortugueseBr": "Portuguese",
+    "PortuguesePt": "Portuguese",
+
+    # ---- Abbreviated forms ----
+    "N. Azerbaijani": "Azerbaijani",
+    "N. Uzbek": "Uzbek",
+    "South Azerbaijani": "Azerbaijani",
+    "Southern Uzbek": "Uzbek",
+
+    # ---- Iranian/Kurdish variety collapses (existing policies) ----
+    "Northern Luri": "Persian",
+    "Mazanderani": "Mazandarani",
+    "Southern Kurdish": "Kurdish",
+    "Laki Kurdish": "Kurdish",
+
+    # ---- Korean variety spelling ----
+    "Jeju-eo": "Jejueo",
+
+    # ---- SLI Yupik abbreviation → St Lawrence Yupik (existing year-7 entry) ----
+    "SLI Yupik": "St Lawrence Yupik",
+
     # Crimean Turkish → Crimean Tatar (user decision: merge)
     "Crimean Turkish": "Crimean Tatar",
 
@@ -991,6 +1111,10 @@ EXCLUDE_SET = {
     "Ol Chiki",           # writing system (used for Santali)
     "Hiragana",           # writing system (Japanese)
     "Bopomofo",           # writing system (Mandarin phonetics)
+    "Hangul",             # writing system (Korean)
+    "Pegon",              # writing system (Javanese/Sundanese Arabic-based)
+    "Nüshu",              # writing system (Chinese, women's script)
+    "Pinyin",             # romanization system, not a language
 
     # ---- Language families / groupings (not individual languages) ----
     "Indo-European", "Sino-Tibetan", "Polynesian", "Uto-Aztecan",
@@ -1025,6 +1149,13 @@ EXCLUDE_SET = {
     "East Asian languages",  # geographic umbrella
     "Asturleonese",      # umbrella for Asturian/Leonese/Mirandese
     "Bahasa",            # umbrella (means "language" in Malay)
+    # Year-8 family/umbrella additions
+    "Altaic",            # controversial / discredited family
+    "Sinitic",           # family (Chinese branch)
+    "Nahuatl languages", # umbrella
+    "Bihari languages",  # umbrella
+    "Bahnaric",          # family
+    "To-tonacan",        # family
 
     # ---- Dataset / corpus / treebank tags that leaked in ----
     "l2-standard", "l2-perceived", "buckeye", "doreco", "voxangeles",
@@ -1064,6 +1195,12 @@ EXCLUDE_SET = {
     "Tunisian", "Lebanese", "Qatari",
     "Grenadian", "Puerto Rican",
     "Ethiopian", "Eritrean", "Jewish",
+    # Year-8 nationality labels
+    "African",           # too generic
+    "Belgian",           # nationality
+    "Swiss",             # nationality
+    "Kenyan",            # nationality
+    "Roman",             # ancient/period label, not a language
 
     # ---- Other non-language entries ----
     "Mathematical Symbols", "Formal Languages",
@@ -1107,6 +1244,21 @@ EXCLUDE_SET = {
     "Numma-guhooni",   # unknown
     "Arya",            # unclear / data error
     "Baharic",         # unknown / typo
+    # Year-8 data errors / definitely-not-languages
+    "Ptarmigan",       # a bird, not a language
+    "Iroko",           # an African tree, not a language
+    "Soto",            # too ambiguous (typo of Sesotho?); excluded
+    "Aryan",           # ideological / vague
+    "Carari",          # unknown
+    "Sanna",           # unknown
+    "Oro",             # ambiguous / data error
+    "Chey",            # unknown / could be Cheyenne typo
+    "Hexadecimal",     # encoding format
+    "Emoji",           # not a language
+    "Dyck-2",          # formal language theory
+    "Expr",            # expression / programming
+    "Point Cloud",     # 3D data format, not a language
+    "Math",            # domain
 
     # ---- Religious-text / domain tags (not languages) ----
     "Koran",        # the Quran (religious text), not a language
@@ -1116,6 +1268,8 @@ EXCLUDE_SET = {
     "American Literature",  # domain
     "Northeast Asian Archaeological Sites",  # domain
     "Others",       # umbrella placeholder
+    "Hindustani Classical",  # music genre/domain
+    "Turkish Makam",         # music form/domain
 
     # ---- Too-generic / ambiguous umbrellas ----
     "Pidgin",                  # ambiguous (Nigerian Pidgin? Tok Pisin? ...)
@@ -1123,6 +1277,7 @@ EXCLUDE_SET = {
 
     # ---- Code-mixed labels ----
     "CodeMixed",
+    "CodeMix",
 
     # ---- Code-mixed language-pair labels ----
     "Komi-Zyrian-Russian",     # code-mixed Komi-Zyrian/Russian content
