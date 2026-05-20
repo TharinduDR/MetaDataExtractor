@@ -1352,6 +1352,12 @@ REGIONAL_HISTORICAL_KEEPERS = {
     "classical arabic",     # arb (Standard Arabic macrolang)
     "classical syriac",     # syc
     "vedic sanskrit",       # has own corpus tradition, kept distinct
+    "classical sanskrit",   # paired with Vedic Sanskrit
+    # Year-9 additions: historical forms of regional-collapse-trigger languages
+    "old spanish",          # osp — distinct historical language
+    "old japanese",         # ojp — distinct historical language
+    "middle japanese",      # ojp / variants — preempt future entries
+    "old occitan",          # pro
     # Other multi-word "<Modifier> <Language>" entries that ARE distinct
     # languages with ISO codes:
     "african american english",  # aae
