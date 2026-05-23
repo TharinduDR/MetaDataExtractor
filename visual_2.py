@@ -194,7 +194,7 @@ def fig2_temporal_heatmap(df: pd.DataFrame, out_path: Path):
     ax.set_xlabel("Year")
     ax.set_ylabel("")
     ax.tick_params(axis="x", rotation=0, labelsize=9)
-    ax.tick_params(axis="y", labelsize=8.5)
+    ax.tick_params(axis="y", rotation=0, labelsize=8.5)
 
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
