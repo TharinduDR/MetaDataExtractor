@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p parallel          # your indefinite/long CPU queue — set this
+#SBATCH -p serial          # your indefinite/long CPU queue — set this
 #SBATCH --job-name=acl-orchestrator
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
