@@ -54,18 +54,22 @@ def _headers():
 
 
 def list_year_collections_api(year, main_only=False):
-    log(f"listing data/xml via GitHub API for year {year}")
-    resp = requests.get(API_DIR, timeout=30, headers=_headers())
+    """List collections via the git trees API (handles >1000 files)."""
+    log(f"listing data/xml via git trees API for year {year}")
+    # Resolve the tree for data/xml on master, recursively.
+    url = ("https://api.github.com/repos/acl-org/acl-anthology/"
+           "git/trees/master:data/xml")
+    resp = requests.get(url, timeout=30, headers=_headers())
     log(f"  HTTP {resp.status_code}")
-    if resp.status_code == 403:
-        log("  API 403 (rate limit?) — caller should fall back to --no-api")
     resp.raise_for_status()
-    entries = resp.json()
+    data = resp.json()
+    if data.get("truncated"):
+        log("  WARNING: tree response truncated; some files may be missing")
     prefix = f"{year}."
     coll_ids = []
-    for e in entries:
-        name = e.get("name", "")
-        if name.startswith(prefix) and name.endswith(".xml"):
+    for node in data.get("tree", []):
+        name = node.get("path", "")
+        if node.get("type") == "blob" and name.startswith(prefix) and name.endswith(".xml"):
             coll_ids.append(name[:-4])
     return _filter(coll_ids, main_only)
 
